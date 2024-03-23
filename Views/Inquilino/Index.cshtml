@@ -1,0 +1,68 @@
+﻿@model IEnumerable<Inquilino>;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Inquilinos</h1>
+    <h4>Lista de Inquilinos:</h4>
+        <table class="table">
+            <thead class="table-dark">
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Nombre)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Apellido)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Email)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Telefono)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Dni)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Domicilio)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model){
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Nombre)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Apellido)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Email)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Telefono)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Dni)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Domicilio)
+                        </td>
+                        <td>
+                            <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar"><i class="bi bi-pencil-fill text-primary"></i></a>
+                            <a asp-action="Eliminar" asp-route-id="@item.Id" title="Eliminar"><i class="bi bi-trash-fill text-danger"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+</div>
