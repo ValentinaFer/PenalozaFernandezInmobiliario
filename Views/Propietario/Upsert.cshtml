@@ -1,0 +1,61 @@
+﻿@model UpsertPropietarioViewModel;
+@{
+    ViewData["Title"] = "Home Page";
+    int id = Model.Propietario == null ? 0 : Model.Propietario.Id;
+}
+
+<div class="text-center">
+    <h1 class="display-4">Propietarios</h1>
+    <h4>@Model.Tittle</h4>
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Guardar" method="post">
+                <div asp-validation-summary="ModelOnly"></div>
+                <div class="form-group">
+                    <label asp-for="Propietario.Id" class="control-label"></label>
+                    <input asp-for="Propietario.Id" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Propietario.Nombre" class="control-label"></label>
+                    <input asp-for="Propietario.Nombre" class="form-control">
+                    <span asp-validation-for="Propietario.Nombre" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Propietario.Apellido" class="control-label"></label>
+                    <input asp-for="Propietario.Apellido" class="form-control">
+                    <span asp-validation-for="Propietario.Apellido" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Propietario.Email" class="control-label"></label>
+                    <input asp-for="Propietario.Email" class="form-control">
+                    <span asp-validation-for="Propietario.Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Propietario.Dni" class="control-label"></label>
+                    <input asp-for="Propietario.Dni" class="form-control">
+                    <span asp-validation-for="Propietario.Dni" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Propietario.Telefono" class="control-label"></label>
+                    <input asp-for="Propietario.Telefono" class="form-control">
+                    <span asp-validation-for="Propietario.Telefono" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Propietario.Domicilio" class="control-label"></label>
+                    <input asp-for="Propietario.Domicilio" class="form-control">
+                    <span asp-validation-for="Propietario.Domicilio" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Guardar" class="btn btn-primary m-2">
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

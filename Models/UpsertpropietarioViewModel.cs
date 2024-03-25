@@ -2,9 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PenalozaFernandezInmobiliario.Models;
 
-public class UpsertInquilinoViewModel
+public class UpsertPropietarioViewModel
 {
     public string? Tittle { get; set; }
-    public Inquilino? Inquilino { get; set; }
+    public Propietario? Propietario { get; set; }
 }
-

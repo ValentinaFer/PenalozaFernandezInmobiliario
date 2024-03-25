@@ -40,7 +40,7 @@ public class InquilinoController : Controller
         }
     }
 
-//GIRL(me to me), don't forget to try catch the exception with the rest of the code
+    //GIRL(me to me), don't forget to try catch the exception with the rest of the code
     [HttpPost]
     public IActionResult Guardar(UpsertInquilinoViewModel inquilinoViewModel)
     {
@@ -78,5 +78,5 @@ public class InquilinoController : Controller
 
     }
 
-    
+
 }
