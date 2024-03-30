@@ -1,0 +1,32 @@
+﻿@model Inquilino;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Inquilinos</h1>
+
+    <div>
+        <div>
+            <h4>Información personal</h4>
+            <hr>
+            <div class="text-start">
+                <p>@Html.DisplayNameFor(model => model.Id): @Html.DisplayFor(model => model.Id)</p>
+                <p>@Html.DisplayNameFor(model => model.Nombre): @Html.DisplayFor(model => model.Nombre)</p>
+                <p>@Html.DisplayNameFor(model => model.Apellido): @Html.DisplayFor(model => model.Apellido)</p>
+                <p>@Html.DisplayNameFor(model => model.Dni): @Html.DisplayFor(model => model.Dni)</p>
+                <p>@Html.DisplayNameFor(model => model.Domicilio): @Html.DisplayFor(model => model.Domicilio)</p>
+            </div>
+        </div>
+
+        <div>
+            <h4>Información de contacto</h4>
+            <hr>
+            <div class="text-start">
+                <p>@Html.DisplayNameFor(model => model.Email): @Html.DisplayFor(model => model.Email)</p>
+                <p>@Html.DisplayNameFor(model => model.Telefono): @Html.DisplayFor(model => model.Telefono)</p>
+            </div>
+        </div>
+    </div>
+
+</div>

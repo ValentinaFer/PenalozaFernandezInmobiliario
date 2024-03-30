@@ -17,7 +17,7 @@ public class InquilinoController : Controller
 
     public IActionResult Index()
     {
-        var lista = rp.GetAll();
+        var lista = rp.GetAllForIndex();
         return View(lista);
     }
 
@@ -78,5 +78,18 @@ public class InquilinoController : Controller
 
     }
 
+    public IActionResult Eliminar(int id)
+    {
+        rp.Delete(id);
+        return RedirectToAction("Index");
+    }
 
+    public IActionResult DetalleInquilino(int id){
+        if (id > 0){
+            var inq = rp.GetById(id);
+            return View(inq);
+        } else {
+            return RedirectToAction("Index");
+        }
+    }
 }

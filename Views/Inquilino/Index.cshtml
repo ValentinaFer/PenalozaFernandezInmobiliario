@@ -10,9 +10,6 @@
             <thead class="table-dark">
                 <tr>
                     <th>
-                        @Html.DisplayNameFor(model => model.Id)
-                    </th>
-                    <th>
                         @Html.DisplayNameFor(model => model.Nombre)
                     </th>
                     <th>
@@ -28,7 +25,7 @@
                         @Html.DisplayNameFor(model => model.Dni)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Domicilio)
+                        
                     </th>
                     <th>
                         
@@ -38,9 +35,6 @@
             <tbody>
                 @foreach(var item in Model){
                     <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Id)
-                        </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Nombre)
                         </td>
@@ -56,9 +50,10 @@
                         <td>
                             @Html.DisplayFor(modelItem => item.Dni)
                         </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Domicilio)
-                        </td>
+                        <th>
+                            <a asp-action="DetalleInquilino" asp-route-id="@item.Id">Ver más</a>
+                        </th>
+
                         <td class="text-nowrap">
                             <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar" ><i class="bi bi-pencil-fill text-primary"></i></a>
                             <a asp-action="Eliminar" asp-route-id="@item.Id" title="Eliminar"><i class="bi bi-trash-fill text-danger"></i></a>

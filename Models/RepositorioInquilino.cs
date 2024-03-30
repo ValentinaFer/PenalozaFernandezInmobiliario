@@ -13,6 +13,39 @@ public class RepositorioInquilino
 
     }
 
+    //trae solo data necesaria para mostrar en index
+    public IList<Inquilino> GetAllForIndex()
+    {
+        var inquilinos = new List<Inquilino>();
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"SELECT {nameof(Inquilino.Id)}, {nameof(Inquilino.Nombre)}, {nameof(Inquilino.Apellido)},
+             {nameof(Inquilino.Dni)}, {nameof(Inquilino.Telefono)}, {nameof(Inquilino.Email)} FROM inquilinos WHERE {nameof(Inquilino.Estado)} =1";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                connection.Open();
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        inquilinos.Add(new Inquilino{
+                            Id = reader.GetInt32(nameof(Inquilino.Id)),
+                            Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                            Apellido = reader.GetString(nameof(Inquilino.Apellido)),
+                            Dni = reader.GetString(nameof(Inquilino.Dni)),
+                            Telefono = reader.GetString(nameof(Inquilino.Telefono)),
+                            Email = reader.GetString(nameof(Inquilino.Email))
+                        });
+                        
+                    }
+                    connection.Close();
+                }
+            }
+        }
+        return inquilinos;
+    }
+
     public IList<Inquilino> GetAll()
     {
         var inquilinos = new List<Inquilino>();
@@ -20,7 +53,7 @@ public class RepositorioInquilino
         {
             var sql = @$"SELECT {nameof(Inquilino.Id)}, {nameof(Inquilino.Nombre)}, {nameof(Inquilino.Apellido)},
              {nameof(Inquilino.Dni)}, {nameof(Inquilino.Domicilio)}, {nameof(Inquilino.Telefono)},
-              {nameof(Inquilino.Email)} FROM inquilinos";
+              {nameof(Inquilino.Email)} FROM inquilinos WHERE {nameof(Inquilino.Estado)} = 1";
 
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -128,7 +161,7 @@ public class RepositorioInquilino
     public int Delete(int id){
         int result = -1;
         using(var connection = new MySqlConnection(ConnectionString)){
-            var sql = @$"DELETE FROM inquilinos WHERE {nameof(Inquilino.Id)} = @{nameof(Inquilino.Id)}";
+            var sql = @$"UPDATE inquilinos SET {nameof(Inquilino.Estado)} = 0 WHERE {nameof(Inquilino.Id)} = @{nameof(Inquilino.Id)}";
             using(var command = new MySqlCommand(sql, connection)){
                 command.Parameters.AddWithValue(nameof(Inquilino.Id), id);
                 connection.Open();
