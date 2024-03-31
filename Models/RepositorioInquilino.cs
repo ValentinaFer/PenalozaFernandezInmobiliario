@@ -14,13 +14,16 @@ public class RepositorioInquilino
     }
 
     //trae solo data necesaria para mostrar en index
-    public IList<Inquilino> GetAllForIndex()
+    public IList<Inquilino> GetAllForIndex(int pageSize, int pageNumber)
     {
         var inquilinos = new List<Inquilino>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
             var sql = @$"SELECT {nameof(Inquilino.Id)}, {nameof(Inquilino.Nombre)}, {nameof(Inquilino.Apellido)},
-             {nameof(Inquilino.Dni)}, {nameof(Inquilino.Telefono)}, {nameof(Inquilino.Email)} FROM inquilinos WHERE {nameof(Inquilino.Estado)} =1";
+             {nameof(Inquilino.Dni)}, {nameof(Inquilino.Telefono)}, {nameof(Inquilino.Email)} 
+             FROM inquilinos 
+             WHERE {nameof(Inquilino.Estado)} = 1
+             LIMIT {pageSize} OFFSET {(pageNumber - 1) * pageSize};";
 
             using (var command = new MySqlCommand(sql, connection))
             {
