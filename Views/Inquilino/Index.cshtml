@@ -4,85 +4,87 @@
 
 }
 
-<div class="text-center">
+<div class="text-center row fw-light">
 
-    <h1 class="display-4">Inquilinos</h1>
 
-    @Html.Partial("_ToastModal")
-    <a asp-action="Upsert" class="btn btn-primary text-light hover rounded-pill m-2 p-3"
-        title="Agregar un nuevo Inquilino">
-        <p class="d-inline">Agregar nuevo Inquilino</p><i class="bi bi-person-add ps-1"></i>
-    </a>
-    <table class="table">
-        <thead class="table-dark">
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Nombre)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Apellido)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Email)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Telefono)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Dni)
-                </th>
-                <th>
+    <div class="col bg-light py-5 px-4 rounded-3">
+        <h1 class="display-4 ">Inquilinos</h1>
 
-                </th>
-                <th>
-
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Inquilinos)
-            {
+        @Html.Partial("_ToastModal")
+        <a asp-action="Upsert" class="btn btn-primary text-light hover rounded-pill m-2 p-3"
+            title="Agregar un nuevo Inquilino">
+            <p class="d-inline">Agregar nuevo Inquilino</p><i class="bi bi-person-add ps-1"></i>
+        </a>
+        <table class="table table-light text-start ">
+            <thead class="text-secondary">
                 <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Nombre)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Apellido)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Email)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Telefono)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Dni)
-                    </td>
                     <th>
-                        <a asp-action="DetalleInquilino" asp-route-id="@item.Id">Ver más</a>
+                        @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Nombre)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Apellido)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Email)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Telefono)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Dni)
+                    </th>
+                    <th class="text-end">
+                        Acciones
                     </th>
 
-                    <td class="text-nowrap">
-                        <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar"><i
-                                class="bi bi-pencil-fill text-primary"></i></a>
-                        <a asp-action="Eliminar" asp-route-id="@item.Id" title="Eliminar"><i
-                                class="bi bi-trash-fill text-danger"></i></a>
-                    </td>
                 </tr>
-            }
-        </tbody>
-    </table>
-    <a class="btn btn-primary" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber-1)">
-        <i class="bi bi-arrow-left"></i> Volver
-    </a>
-    <a class="btn btn-primary" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber+1)">
-        Siguiente <i class="bi bi-arrow-right"></i>
-    </a>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Inquilinos)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Nombre)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Apellido)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Email)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Telefono)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Dni)
+                        </td>
+                        <td class="text-nowrap text-end">
+                            <a asp-action="DetalleInquilino" asp-route-id="@item.Id" title="Ver más"
+                                class="btn btn-info py-1 px-2"><i class="bi bi-person-vcard-fill text-light"></i></a>
+                            <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar"
+                                class="btn btn-primary py-1 px-2"><i class="bi bi-pencil-fill text-light"></i></a>
+                            <a asp-action="Eliminar" asp-route-id="@item.Id" title="Eliminar"
+                                class="btn btn-danger py-1 px-2"><i class="bi bi-trash-fill text-light"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <a class="btn btn-primary" asp-action="Index" title="Página anterior"
+            asp-route-pageNumber="@(Model.PageNumber-1)">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <a class="btn btn-primary" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber+1)">
+            Siguiente <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+
 
 
     @section Scripts {
         @{
-            //if (Model != null && Model.ToastMessage != null) //descomentar con confianza jeje
+            if (Model != null && Model.ToastMessage != null)
             {
                 <text>
                     <script>

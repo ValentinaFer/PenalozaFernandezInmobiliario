@@ -31,15 +31,18 @@ public class InquilinoController : Controller
                 lista = rp.GetAllForIndex(10, pageNumber-1);
                 pageNumber = pageNumber-1;
             }
-            IndexInquilinoViewModel vm = new();
-            vm.Inquilinos = lista;
-            //vm.ToastMessage = "heeey";
-            vm.PageNumber = pageNumber;
-            if (TempData.ContainsKey("ToastMessage") && TempData["ToastMessage"] != null){
+            IndexInquilinoViewModel vm = new()
+            {
+                Inquilinos = lista,
+                //vm.ToastMessage = "heeey";
+                PageNumber = pageNumber
+            };
+            vm.ToastMessage = "";
+            if (TempData.ContainsKey("ToastMessage")){
                 vm.ToastMessage = TempData["ToastMessage"] as string;
-                TempData["ToastMessage"] = null;
+                
             }
-            
+            TempData.Remove("ToastMessage");
             _logger.LogInformation("index method:"+vm.ToastMessage);	
             return View(vm);
         } catch (Exception ex)
@@ -80,7 +83,7 @@ public class InquilinoController : Controller
                 _logger.LogInformation("Model state is valid");
                 if (inquilinoViewModel.Inquilino.Id > 0)
                 {
-                    rp.Update(inquilinoViewModel.Inquilino);
+                    return RedirectToAction("Update",inquilinoViewModel.Inquilino);
                 }
                 else
                 {
@@ -107,42 +110,113 @@ public class InquilinoController : Controller
     [HttpGet]
     public IActionResult Create(Inquilino inquilino){
         try{
-        if (rp.Create(inquilino) > 0){
-            TempData["ToastMessage"] = "Inquilino creado con exito!";
-        } else {
-            TempData["ToastMessage"] = "No se pudo crear el inquilino..";
-        }
+            var result = rp.Create(inquilino);
+            _logger.LogInformation("Create Result: {result}", result);
+            if (result > 0){
+                TempData["ToastMessage"] = "Inquilino creado con exito!";
+            } else {
+                TempData["ToastMessage"] = "No se pudo crear el inquilino..";
+            }
         
         } catch (Exception ex){
-             _logger.LogError(ex, "Error al guardar"); //remember to be more specific here
+            _logger.LogError(ex, "Error al guardar"); //remember to be more specific here
+            TempData["Error"] = "Se produjo un error al crear el inquilino";
         }
+        try{
         return RedirectToAction("Index", new { pageNumber = 1 });
-    }
-
-    [HttpPut]
-    public IActionResult Update(Inquilino inquilino){
-        rp.Update(inquilino);
-        return RedirectToAction("Index", new { pageNumber = 1 });
-    }
-
-    [HttpDelete]
-    public IActionResult Eliminar(int id)
-    {
-        rp.Delete(id);
-        return RedirectToAction("Index", new { pageNumber = 1 });
+        } catch (Exception ex){
+            _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
+            TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
+            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
+        }
     }
 
     [HttpGet]
-    public IActionResult DetalleInquilino(int id)
+    public IActionResult Update(Inquilino inquilino){
+        try{
+            var result = rp.Update(inquilino);
+            _logger.LogInformation("Update Result: {result}", result);
+            if (result > 0){
+                TempData["ToastMessage"] = "Inquilino editado con exito!";
+            } else {
+                TempData["ToastMessage"] = "No se pudo editar el inquilino..";
+            }
+        } catch (Exception ex){
+            _logger.LogError(ex, "Error al guardar"); //remember to be more specific here
+            TempData["Error"] = "Se produjo un error al editar el inquilino";
+        }
+        try{
+        return RedirectToAction("Index", new { pageNumber = 1 });
+        } catch (Exception ex){
+            _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
+            TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
+            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
+        }
+    }
+
+    [HttpPost]
+    public IActionResult Delete(int id){
+        try{
+            _logger.LogInformation("Delete id: {id}", id);
+            var result = rp.Delete(id);
+            _logger.LogInformation("Update Result: {result}", result);
+            if (result > 0){
+                TempData["ToastMessage"] = "Inquilino eliminado con exito!";
+            } else {
+                TempData["ToastMessage"] = "No se pudo eliminar el inquilino..";
+            }
+        } catch (Exception ex){
+            _logger.LogError(ex, "Error al eliminar"); //remember to be more specific here
+            TempData["Error"] = "Se produjo un error al eliminar el inquilino";
+        }
+        try{
+        return RedirectToAction("redirectToIndex");
+        } catch (Exception ex){
+            _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
+            TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
+            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
+        }
+    }
+
+    //the call from the button to delete
+    [HttpGet]
+    public IActionResult Eliminar(int id)
     {
-        if (id > 0)
+        return RedirectToAction("DetalleInquilino", new { id = id , eliminateFlag = true });
+    }
+
+    //Shows the view with the data of the selected inquilino
+    //if there's a flag in the viewdata, it means that it's a redirect from the button to delete, thus it the flag to show a form to confirm deletion
+    [HttpGet]
+    public IActionResult DetalleInquilino(int id, bool eliminateFlag = false)
+    {
+        try{
+            if (id > 0)
+            {
+                if (eliminateFlag){
+                    ViewData["EliminandoFlag"] = true;
+                } else {
+                    ViewData["EliminandoFlag"] = false;
+                }
+                _logger.LogInformation("Received flag: {flag}", ViewData["EliminandoFlag"]);
+                var inq = rp.GetById(id);
+                return View(inq);
+            }
+            else
+            {
+                return RedirectToAction("Index", new { pageNumber = 1 });
+            }
+        }catch(Exception ex)
         {
-            var inq = rp.GetById(id);
-            return View(inq);
+            _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
+            TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
+            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
+
         }
-        else
-        {
-            return RedirectToAction("Index", new { pageNumber = 1 });
-        }
+    }
+
+    public IActionResult redirectToIndex()
+    {
+        return RedirectToAction("Index", new { pageNumber = 1 });
     }
 }

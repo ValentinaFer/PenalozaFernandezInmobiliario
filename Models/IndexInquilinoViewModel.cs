@@ -8,5 +8,7 @@ public class IndexInquilinoViewModel
     public int PageNumber { get; set; }
 
     public string? ToastMessage { get; set; }
+
+    public string? Error { get; set; }
 }
 
