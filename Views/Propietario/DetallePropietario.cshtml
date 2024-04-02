@@ -1,0 +1,53 @@
+﻿@model Propietario;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
+    <h1 class="display-4">Inquilinos</h1>
+
+    <div class="col-md">
+        <h3>Detalles del Inquilino</h3>
+        <div class="col">
+            <h5>Información personal</h5>
+            <hr>
+            <div class="text-start">
+                <p>@Html.DisplayNameFor(model => model.Id): @Html.DisplayFor(model => model.Id)</p>
+                <p>@Html.DisplayNameFor(model => model.Nombre): @Html.DisplayFor(model => model.Nombre)</p>
+                <p>@Html.DisplayNameFor(model => model.Apellido): @Html.DisplayFor(model => model.Apellido)</p>
+                <p>@Html.DisplayNameFor(model => model.Dni): @Html.DisplayFor(model => model.Dni)</p>
+                <p>@Html.DisplayNameFor(model => model.Domicilio): @Html.DisplayFor(model => model.Domicilio)</p>
+            </div>
+        </div>
+
+        <div class="col">
+            <h5>Información de contacto</h5>
+            <hr>
+            <div class="text-start">
+                <p>@Html.DisplayNameFor(model => model.Email): @Html.DisplayFor(model => model.Email)</p>
+                <p>@Html.DisplayNameFor(model => model.Telefono): @Html.DisplayFor(model => model.Telefono)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        @if (ViewData["EliminandoFlag"] != null && (bool)ViewData["EliminandoFlag"])
+        {
+            <text>
+                <div class="">
+                    <p class="text-danger"><strong>¿Está seguro que desea eliminar este Inquilino?</strong></p>
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" name="id" value="@Model.Id">
+                        <input type="submit" class="btn btn-danger" value="Sí, eliminar">
+                    </form>
+                    <a asp-action="Index" class="btn btn-primary">No, Volver al listado</a>
+
+                </div>
+
+            </text>
+
+        }
+    </div>
+
+
+</div>

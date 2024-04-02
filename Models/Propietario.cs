@@ -20,5 +20,6 @@ public class Propietario
     public string? Dni { get; set; }
     [Required(ErrorMessage = "Por favor, ingrese el {0} del inquilino")]
     public string? Domicilio { get; set; }
+    public bool Estado { get; set; }
 
 }
