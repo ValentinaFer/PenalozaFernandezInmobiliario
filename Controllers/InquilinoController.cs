@@ -26,7 +26,7 @@ public class InquilinoController : Controller
             var lista = rp.GetAllForIndex(10, pageNumber);
             if (lista.Count == 0)
             {
-                //Inquilino inquilino = new(); //remember to handle this!
+                //Inquilino inquilino = new(); //remember to handle this when working with pagination!
                 //lista.Add(inquilino);
                 lista = rp.GetAllForIndex(10, pageNumber-1);
                 pageNumber = pageNumber-1;
@@ -58,18 +58,24 @@ public class InquilinoController : Controller
         UpsertInquilinoViewModel viewModel = new();
         //if el id es 0 quiere decir que se esta creado un Inquilino,
         //Se mandaria un ID especifico mayor a cero si se llegara a estar editando un Inquilino(el inquilido dueño de dicho id)
-        if (id > 0)
-        { //se lleva a view en modo de edicion
-            viewModel.Inquilino = rp.GetById(id);
-            viewModel.Tittle = "Editando Inquilino";
-            return View(viewModel);
+        try{
+            if (id > 0)
+                { //se lleva a view en modo de edicion
+                    viewModel.Inquilino = rp.GetById(id);
+                    viewModel.Tittle = "Editando Inquilino n°" + viewModel.Inquilino.Id;
+                    return View(viewModel);
+                }
+                else
+                { //se lleva a view en modo de creacion
+                    viewModel.Tittle = "Creando Inquilino";
+                    viewModel.Inquilino = new Inquilino();
+                    return View(viewModel);
+                }
+        } catch (Exception ex){
+            _logger.LogError(ex, "Error al buscar el inquilino");
+            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        else
-        { //se lleva a view en modo de creacion
-            viewModel.Tittle = "Creando Inquilino";
-            viewModel.Inquilino = new Inquilino();
-            return View(viewModel);
-        }
+        
     }
 
     //GIRL(me to me), don't forget to try catch the exception with the rest of the code
