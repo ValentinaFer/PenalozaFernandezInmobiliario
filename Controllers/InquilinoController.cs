@@ -24,10 +24,12 @@ public class InquilinoController : Controller
                 pageNumber = 1;
             }
             var lista = rp.GetAllForIndex(10, pageNumber);
-            if (lista.Count == 0)
+
+            if (lista.Count == 0 && pageNumber != 1)
             {
                 //Inquilino inquilino = new(); //remember to handle this when working with pagination!
                 //lista.Add(inquilino);
+                _logger.LogWarning("No hay mas inquilinos para mostrar");
                 lista = rp.GetAllForIndex(10, pageNumber-1);
                 pageNumber = pageNumber-1;
             }
