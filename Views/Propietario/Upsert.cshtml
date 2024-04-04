@@ -4,11 +4,11 @@
     int id = Model.Propietario == null ? 0 : Model.Propietario.Id;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Propietarios</h1>
-    <h4>@Model.Tittle</h4>
-    <div class="row">
-        <div class="col-md-4">
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-white rounded p-6">
+            <h1 class="display-4">Propietarios</h1>
+            <h4>@Model.Tittle</h4>
             <form asp-action="Guardar" method="post">
                 <div asp-validation-summary="ModelOnly"></div>
                 <div class="form-group">
@@ -51,7 +51,6 @@
             </form>
         </div>
     </div>
-
 </div>
 
 @section Scripts {
