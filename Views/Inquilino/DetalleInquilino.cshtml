@@ -34,13 +34,14 @@
         @if (ViewData["EliminandoFlag"] != null && (bool)ViewData["EliminandoFlag"])
         {
             <text>
-                <div class="">
+                <div class="bg-danger-subtle py-3 rounded-3 border border-danger">
                     <p class="text-danger"><strong>¿Está seguro que desea eliminar este Inquilino?</strong></p>
                     <form asp-action="Delete" method="post">
                         <input type="hidden" name="id" value="@Model.Id">
                         <input type="submit" class="btn btn-danger" value="Sí, eliminar">
+                        <a asp-action="Index" class="btn btn-primary">No, volver al listado</a>
                     </form>
-                    <a asp-action="Index" class="btn btn-primary">No, Volver al listado</a>
+                    
 
                 </div>
 
