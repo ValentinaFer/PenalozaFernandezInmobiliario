@@ -42,6 +42,13 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @if (ViewData["TablaVacia"] != null && ViewData["TablaVacia"] != ""){
+                        <text>
+                            <tr scope="row">
+                            <td colspan="6" class="text-center">@ViewData["TablaVacia"]</td>
+                            </tr>
+                        </text>
+                    }
                     @foreach (var item in Model.Inquilinos)
                     {
                         <tr>
@@ -71,6 +78,7 @@
                         </tr>
                     }
                 </tbody>
+                
             </table>
         </div>
 

@@ -19,40 +19,62 @@ public class InquilinoController : Controller
     {
         try
         {
-            if (pageNumber <= 0)
-            {
-                pageNumber = 1;
-            }
-            var lista = rp.GetAllForIndex(10, pageNumber);
-
-            if (lista.Count == 0 && pageNumber != 1)
-            {
-                //Inquilino inquilino = new(); //remember to handle this when working with pagination!
-                //lista.Add(inquilino);
-                _logger.LogWarning("No hay mas inquilinos para mostrar");
-                lista = rp.GetAllForIndex(10, pageNumber-1);
-                pageNumber = pageNumber-1;
-            }
+            _logger.LogInformation("GetHasMorePages:" + pageNumber + rp.getHasMorePages(pageNumber, 10));
+            pageNumber = HandlePagination(pageNumber);
+            var lista = rp.GetAllForIndex(10, pageNumber); //Consider allowing user to change page size (from me to me)
+            
+            HandleMessagesTableVacia(lista.Count, pageNumber);
             IndexInquilinoViewModel vm = new()
             {
                 Inquilinos = lista,
-                //vm.ToastMessage = "heeey";
+                ToastMessage = GetToastMessage(),
                 PageNumber = pageNumber
             };
-            vm.ToastMessage = "";
-            if (TempData.ContainsKey("ToastMessage")){
-                vm.ToastMessage = TempData["ToastMessage"] as string;
-                
-            }
-            TempData.Remove("ToastMessage");
+            
             _logger.LogInformation("index method:"+vm.ToastMessage);	
             return View(vm);
-        } catch (Exception ex)
+        } catch (Exception ex) //get more specific here (from me to me)
         {
             _logger.LogError(ex, "Error al cargar la lista de inquilinos");
             return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+    }
+
+    private int HandlePagination(int pageNumber){ //working on this still (from me to me)
+        if (pageNumber <= 0)
+        {
+            pageNumber = 1;
+        }
+        return pageNumber;
+    }
+
+    private void HandleMessagesTableVacia(int listaCount, int pageNumber)
+    {
+        if (listaCount == 0)
+        {
+            if (pageNumber != 1)
+            {
+                _logger.LogWarning("No hay mas inquilinos para mostrar!");
+                //disable next page button?
+            }
+            else
+            {
+                _logger.LogWarning("No hay inquilinos para mostrar");
+                ViewData["TablaVacia"] = "No hay inquilinos para mostrar";
+            }
+        }
+    }
+
+    private string GetToastMessage()
+    {
+        if (TempData.ContainsKey("ToastMessage"))
+        {
+            var toastMessage = TempData["ToastMessage"] as string;
+            TempData.Remove("ToastMessage");
+            return toastMessage;
+        }
+        return "";
     }
 
     public IActionResult Upsert(int id)
@@ -80,7 +102,7 @@ public class InquilinoController : Controller
         
     }
 
-    //GIRL(me to me), don't forget to try catch the exception with the rest of the code
+    //GIRL(me to me), don't forget to try catch the exception on the rest of the code
     [HttpPost]
     public IActionResult Guardar(UpsertInquilinoViewModel inquilinoViewModel)
     {
@@ -194,7 +216,7 @@ public class InquilinoController : Controller
     }
 
     //Shows the view with the data of the selected inquilino
-    //if there's a flag in the viewdata, it means that it's a redirect from the button to delete, thus it the flag to show a form to confirm deletion
+    //if there's a flag in the viewdata, it means that it's a redirect from the button to delete, thus is the flag to show a form to confirm deletion
     [HttpGet]
     public IActionResult DetalleInquilino(int id, bool eliminateFlag = false)
     {

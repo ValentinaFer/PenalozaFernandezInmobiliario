@@ -49,6 +49,29 @@ public class RepositorioInquilino
         return inquilinos;
     }
 
+    public bool getHasMorePages(int pageNumber, int pageSize){
+        var result = false;
+        using(var connection = new MySqlConnection(ConnectionString)){
+            using (var command = new MySqlCommand("GET_HASMOREPAGES", connection)){
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("@TableName", "Inquilinos"); //check out how to handle using nameOf here
+                command.Parameters.AddWithValue("@PageNumber", pageNumber);
+                command.Parameters.AddWithValue("@PageSize", pageSize);
+
+                MySqlParameter hasMorePagesParam = new MySqlParameter("@HasMorePages", MySqlDbType.Bit);
+                hasMorePagesParam.Direction = ParameterDirection.Output;
+                command.Parameters.Add(hasMorePagesParam);
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+                result = Convert.ToBoolean(hasMorePagesParam.Value);
+                
+                return result;
+            }
+        }
+    }
+
     public IList<Inquilino> GetAll()
     {
         var inquilinos = new List<Inquilino>();
