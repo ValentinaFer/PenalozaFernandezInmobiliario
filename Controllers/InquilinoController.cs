@@ -19,8 +19,10 @@ public class InquilinoController : Controller
     {
         try
         {
+            _logger.LogInformation("GetHasMorePages:" + pageNumber + rp.getHasMorePages(pageNumber, 10));
             pageNumber = HandlePagination(pageNumber);
-            var lista = rp.GetAllForIndex(10, pageNumber);
+            var lista = rp.GetAllForIndex(10, pageNumber); //Consider allowing user to change page size (from me to me)
+            
             HandleMessagesTableVacia(lista.Count, pageNumber);
             IndexInquilinoViewModel vm = new()
             {
@@ -31,7 +33,7 @@ public class InquilinoController : Controller
             
             _logger.LogInformation("index method:"+vm.ToastMessage);	
             return View(vm);
-        } catch (Exception ex)
+        } catch (Exception ex) //get more specific here (from me to me)
         {
             _logger.LogError(ex, "Error al cargar la lista de inquilinos");
             return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
@@ -39,7 +41,7 @@ public class InquilinoController : Controller
 
     }
 
-    private int HandlePagination(int pageNumber){
+    private int HandlePagination(int pageNumber){ //working on this still (from me to me)
         if (pageNumber <= 0)
         {
             pageNumber = 1;
@@ -100,7 +102,7 @@ public class InquilinoController : Controller
         
     }
 
-    //GIRL(me to me), don't forget to try catch the exception with the rest of the code
+    //GIRL(me to me), don't forget to try catch the exception on the rest of the code
     [HttpPost]
     public IActionResult Guardar(UpsertInquilinoViewModel inquilinoViewModel)
     {
