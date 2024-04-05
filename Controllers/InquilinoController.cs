@@ -19,16 +19,18 @@ public class InquilinoController : Controller
     {
         try
         {
-            _logger.LogInformation("GetHasMorePages:" + pageNumber + rp.getHasMorePages(pageNumber, 10));
-            pageNumber = HandlePagination(pageNumber);
-            var lista = rp.GetAllForIndex(10, pageNumber); //Consider allowing user to change page size (from me to me)
+            var lista = rp.GetAllForIndex(2, pageNumber); //Consider allowing user to change page size (from me to me)
             
-            HandleMessagesTableVacia(lista.Count, pageNumber);
+            HandleMessagesTableVacia(lista.Count);
+            var TotalEntries = rp.getTotalEntries();
             IndexInquilinoViewModel vm = new()
             {
                 Inquilinos = lista,
                 ToastMessage = GetToastMessage(),
-                PageNumber = pageNumber
+                PageNumber = pageNumber,
+                TotalEntries = TotalEntries,
+                TotalPages = (int)Math.Ceiling((double)TotalEntries / 2), //redondeo para arriba
+                HasMorePages = rp.getHasMorePages(pageNumber, 2)
             };
             
             _logger.LogInformation("index method:"+vm.ToastMessage);	
@@ -41,28 +43,12 @@ public class InquilinoController : Controller
 
     }
 
-    private int HandlePagination(int pageNumber){ //working on this still (from me to me)
-        if (pageNumber <= 0)
-        {
-            pageNumber = 1;
-        }
-        return pageNumber;
-    }
-
-    private void HandleMessagesTableVacia(int listaCount, int pageNumber)
+    private void HandleMessagesTableVacia(int listaCount)
     {
         if (listaCount == 0)
         {
-            if (pageNumber != 1)
-            {
-                _logger.LogWarning("No hay mas inquilinos para mostrar!");
-                //disable next page button?
-            }
-            else
-            {
-                _logger.LogWarning("No hay inquilinos para mostrar");
-                ViewData["TablaVacia"] = "No hay inquilinos para mostrar";
-            }
+            _logger.LogWarning("No hay inquilinos para mostrar");
+            ViewData["TablaVacia"] = "No hay inquilinos para mostrar";
         }
     }
 

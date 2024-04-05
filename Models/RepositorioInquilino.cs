@@ -49,6 +49,20 @@ public class RepositorioInquilino
         return inquilinos;
     }
 
+    public int getTotalEntries(){
+        var result = 0;
+        using (var connection = new MySqlConnection(ConnectionString)){
+            var sql = "SELECT COUNT(*) FROM Inquilinos WHERE Estado = 1;";
+
+            using (var command = new MySqlCommand(sql, connection)){
+                connection.Open();
+                result = Convert.ToInt32(command.ExecuteScalar());
+                connection.Close();
+                return result;
+            }
+        }
+    }
+
     public bool getHasMorePages(int pageNumber, int pageSize){
         var result = false;
         using(var connection = new MySqlConnection(ConnectionString)){
