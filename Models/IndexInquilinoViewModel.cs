@@ -11,8 +11,6 @@ public class IndexInquilinoViewModel
 
     public string? Error { get; set; }
 
-    public bool HasMorePages { get; set; }
-
     public int TotalPages { get; set; }
 
     public int TotalEntries { get; set; }

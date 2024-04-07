@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using PenalozaFernandezInmobiliario.Models;
 
@@ -15,12 +16,11 @@ public class InquilinoController : Controller
         rp = new RepositorioInquilino();
     }
 
-    public IActionResult Index(int pageNumber)
+    public IActionResult Index(int pageNumber = 1)
     {
         try
         {
             var lista = rp.GetAllForIndex(2, pageNumber); //Consider allowing user to change page size (from me to me)
-            
             HandleMessagesTableVacia(lista.Count);
             var TotalEntries = rp.getTotalEntries();
             IndexInquilinoViewModel vm = new()
@@ -29,18 +29,41 @@ public class InquilinoController : Controller
                 ToastMessage = GetToastMessage(),
                 PageNumber = pageNumber,
                 TotalEntries = TotalEntries,
-                TotalPages = (int)Math.Ceiling((double)TotalEntries / 2), //redondeo para arriba
-                HasMorePages = rp.getHasMorePages(pageNumber, 2)
+                TotalPages = (int)Math.Ceiling((double)TotalEntries / 2), //redondeo para arriba para mostrar el total de paginas con precision
+                
             };
             
             _logger.LogInformation("index method:"+vm.ToastMessage);	
             return View(vm);
-        } catch (Exception ex) //get more specific here (from me to me)
+        } catch (Exception ex)
         {
             _logger.LogError(ex, "Error al cargar la lista de inquilinos");
-            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return RedirectToAction("Error", new { codigo = 500 });
+            //return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+    }
+
+    public IActionResult Error(int codigo){
+        var res = HttpContext.Features.Get<IStatusCodeReExecuteFeature>();
+        var RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+        var ErrorViewModel = new ErrorViewModel{
+            RequestId = RequestId,
+        };
+        switch (codigo)
+        {
+            case 404:
+                ViewBag.ErrorMessage = "Sorry, the resource you requested could not be found";
+                
+                break;
+            case 500:
+                ViewBag.ErrorMessage = "Sorry, something went wrong on the server";
+                break;
+            default:
+                ViewBag.ErrorMessage = "Sorry, something went wrong";
+                break;
+        }
+        return View(ErrorViewModel);
     }
 
     private void HandleMessagesTableVacia(int listaCount)
@@ -58,7 +81,7 @@ public class InquilinoController : Controller
         {
             var toastMessage = TempData["ToastMessage"] as string;
             TempData.Remove("ToastMessage");
-            return toastMessage;
+            return toastMessage==null?"":toastMessage;
         }
         return "";
     }
