@@ -10,7 +10,7 @@
         <h1 class="display-4 ">Inquilinos</h1>
         <partial name="_ToastModal"/>
         
-        <a asp-action="Upsert" class="btn btn-primary text-light hover rounded-pill m-2 p-3"
+        <a asp-action="Upsert" class="btn btn-primary text-light hover rounded-pill mb-3 p-3"
             title="Agregar un nuevo Inquilino">
             <p class="d-inline">Agregar nuevo Inquilino</p><i class="bi bi-person-add ps-1"></i>
         </a>
@@ -20,16 +20,17 @@
             <table class="table table-light text-start ">
                 <thead class="text-secondary">
                     <tr>
+                        <td class="d-lg-none"></td>
                         <th>
                             @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Nombre)
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Apellido)
                         </th>
-                        <th>
+                        <th class="d-none d-lg-table-cell">
                             @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Email)
                         </th>
-                        <th>
+                        <th class="d-none d-lg-table-cell">
                             @Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Telefono)
                         </th>
                         <th>
@@ -52,23 +53,26 @@
                     @foreach (var item in Model.Inquilinos)
                     {
                         <tr>
+                            <td class="d-lg-none">
+                            <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collaps-@item.Id" aria-expanded="false" aria-controls="collapse" title="Ver contenido oculto"><i class="bi bi-caret-down-fill"></i></button>
+                            </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Nombre)
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Apellido)
                             </td>
-                            <td>
+                            <td class="d-none d-lg-table-cell">
                                 @Html.DisplayFor(modelItem => item.Email)
                             </td>
-                            <td>
+                            <td class="d-none d-lg-table-cell">
                                 @Html.DisplayFor(modelItem => item.Telefono)
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Dni)
                             </td>
                             <td class="text-nowrap text-end">
-                                <a asp-action="DetalleInquilino" asp-route-id="@item.Id" title="Ver más"
+                                <a asp-action="DetalleInquilino" asp-route-id="@item.Id" title="Ver detalles completos"
                                     class="btn btn-info py-1 px-2"><i class="bi bi-person-vcard-fill text-light"></i></a>
                                 <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar"
                                     class="btn btn-primary py-1 px-2"><i class="bi bi-pencil-fill text-light"></i></a>
@@ -76,6 +80,17 @@
                                     class="btn btn-danger py-1 px-2"><i class="bi bi-trash-fill text-light"></i></a>
                             </td>
                         </tr>
+                        <tr class="d-lg-none">
+                            <td colspan="5" class="p-0">
+                                <div class="collapse d-lg-none" id="collaps-@item.Id">
+                                    <p>@Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Telefono) :
+                                    @Html.DisplayFor(modelItem => item.Telefono)</p>
+                                    <p>@Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Email) :
+                                    @Html.DisplayFor(modelItem => item.Email)</p>
+                                </div>
+                            </td>
+                        </tr>
+                        
                     }
                 </tbody>
                 
