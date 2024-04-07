@@ -20,7 +20,7 @@ public class InquilinoController : Controller
     {
         try
         {
-            var lista = rp.GetAllForIndex(2, pageNumber); //Consider allowing user to change page size (from me to me)
+            var lista = rp.GetAllForIndex(10, pageNumber); //Consider allowing user to change page size (from me to me)
             HandleMessagesTableVacia(lista.Count);
             var TotalEntries = rp.getTotalEntries();
             IndexInquilinoViewModel vm = new()
@@ -29,7 +29,7 @@ public class InquilinoController : Controller
                 ToastMessage = GetToastMessage(),
                 PageNumber = pageNumber,
                 TotalEntries = TotalEntries,
-                TotalPages = (int)Math.Ceiling((double)TotalEntries / 2), //redondeo para arriba para mostrar el total de paginas con precision
+                TotalPages = (int)Math.Ceiling((double)TotalEntries / 10),
                 
             };
             
