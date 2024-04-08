@@ -1,7 +1,7 @@
 ﻿@model UpsertInquilinoViewModel;
 @{
     ViewData["Title"] = "Home Page";
-    int id = Model.Inquilino == null? 0 : Model.Inquilino.Id;
+    int id = Model.Inquilino == null ? 0 : Model.Inquilino.Id;
 }
 
 <div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
@@ -10,10 +10,10 @@
         <h4>@Model.Tittle
         </h4>
     </div>
-    
+
     <div class="col-md-12 col-lg-6">
         <div class="col-lg-8">
-            <form asp-action="Guardar" method="post" class="text-start">
+            <form asp-action="Guardar" method="post" class="text-start" id="myForm">
                 <div asp-validation-summary="ModelOnly"></div>
                 <div class="form-group">
                     <!--<label asp-for="Inquilino.Id" class="control-label"></label>-->
@@ -21,33 +21,45 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="Inquilino.Nombre" class="control-label"></label>
-                    <input asp-for="Inquilino.Nombre" class="form-control">
-                    <span asp-validation-for="Inquilino.Nombre" class="text-danger"></span>
+                    <input asp-for="Inquilino.Nombre" class="form-control" id="name">
+                    <ul id="name-feedback">
+                    </ul>
+
                 </div>
                 <div class="form-group">
                     <label asp-for="Inquilino.Apellido" class="control-label"></label>
-                    <input asp-for="Inquilino.Apellido" class="form-control">
-                    <span asp-validation-for="Inquilino.Apellido" class="text-danger"></span>
+                    <input asp-for="Inquilino.Apellido" class="form-control" id="last-name">
+                    <ul id="last-name-feedback">
+                    </ul>
+
                 </div>
                 <div class="form-group">
                     <label asp-for="Inquilino.Email" class="control-label"></label>
-                    <input asp-for="Inquilino.Email" class="form-control">
-                    <span asp-validation-for="Inquilino.Email" class="text-danger"></span>
+                    <input asp-for="Inquilino.Email" class="form-control" id="email" placeholder="name@example.com">
+                    <ul id="email-feedback">
+                    </ul>
+
                 </div>
                 <div class="form-group">
                     <label asp-for="Inquilino.Dni" class="control-label"></label>
-                    <input asp-for="Inquilino.Dni" class="form-control">
-                    <span asp-validation-for="Inquilino.Dni" class="text-danger"></span>
+                    <input asp-for="Inquilino.Dni" class="form-control" id="dni">
+                    <ul id="dni-feedback">
+                    </ul>
+
                 </div>
                 <div class="form-group">
                     <label asp-for="Inquilino.Telefono" class="control-label"></label>
-                    <input asp-for="Inquilino.Telefono" class="form-control">
-                    <span asp-validation-for="Inquilino.Telefono" class="text-danger"></span>
+                    <input asp-for="Inquilino.Telefono" class="form-control" id="phone">
+                    <ul id="phone-feedback">
+                    </ul>
+
                 </div>
                 <div class="form-group">
                     <label asp-for="Inquilino.Domicilio" class="control-label"></label>
-                    <input asp-for="Inquilino.Domicilio" class="form-control">
-                    <span asp-validation-for="Inquilino.Domicilio" class="text-danger"></span>
+                    <input asp-for="Inquilino.Domicilio" class="form-control" id="address">
+                    <ul id="address-feedback">
+                    </ul>
+
                 </div>
                 <div class="form-group">
                     <input type="submit" value="Guardar" class="btn btn-primary m-2">
@@ -55,9 +67,13 @@
             </form>
         </div>
     </div>
-        
+
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/validationFun.js"></script>
+    <script src="~/js/formValidation.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

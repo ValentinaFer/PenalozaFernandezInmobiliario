@@ -132,6 +132,7 @@ public class InquilinoController : Controller
             else
             {
                 _logger.LogWarning("Model state is invalid");
+                TempData["ToastMessage"] = "Se produjo un error al crear o actualizar el inquilino..";
             }
         }
         catch (Exception ex)
@@ -140,7 +141,7 @@ public class InquilinoController : Controller
 
         }
 
-        _logger.LogInformation("Received data: {@InquilinoViewModel}", inquilinoViewModel.Inquilino.Nombre);
+        _logger.LogInformation("Received data for update/create: {@InquilinoViewModel}", inquilinoViewModel.Inquilino.Nombre);
 
         return RedirectToAction("Index", new { pageNumber = 1 });
 
