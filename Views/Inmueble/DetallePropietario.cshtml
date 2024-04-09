@@ -1,4 +1,4 @@
-﻿@model Propietario;
+﻿@model Inmueble;
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -12,12 +12,13 @@
             <h5>Información personal</h5>
             <hr>
             <div class="text-start">
-                <p>@Html.DisplayNameFor(model => model.IdPropietario): @Html.DisplayFor(model => model.IdPropietario)
+                <p>@Html.DisplayNameFor(model => model.Id): @Html.DisplayFor(model => model.Id)
                 </p>
-                <p>@Html.DisplayNameFor(model => model.Nombre): @Html.DisplayFor(model => model.Nombre)</p>
-                <p>@Html.DisplayNameFor(model => model.Apellido): @Html.DisplayFor(model => model.Apellido)</p>
-                <p>@Html.DisplayNameFor(model => model.Dni): @Html.DisplayFor(model => model.Dni)</p>
-                <p>@Html.DisplayNameFor(model => model.Domicilio): @Html.DisplayFor(model => model.Domicilio)</p>
+                <p>@Html.DisplayNameFor(model => model.Direccion): @Html.DisplayFor(model => model.Direccion)</p>
+                <p>@Html.DisplayNameFor(model => model.Ambientes): @Html.DisplayFor(model => model.Ambientes)</p>
+                <p>@Html.DisplayNameFor(model => model.Latitud): @Html.DisplayFor(model => model.Latitud)</p>
+                <p>@Html.DisplayNameFor(model => model.Longitud): @Html.DisplayFor(model => model.Longitud)</p>
+
             </div>
         </div>
 
@@ -25,8 +26,8 @@
             <h5>Información de contacto</h5>
             <hr>
             <div class="text-start">
-                <p>@Html.DisplayNameFor(model => model.Email): @Html.DisplayFor(model => model.Email)</p>
-                <p>@Html.DisplayNameFor(model => model.Telefono): @Html.DisplayFor(model => model.Telefono)</p>
+                <p>@Html.DisplayNameFor(model => model.Superficie): @Html.DisplayFor(model => model.Superficie)</p>
+
             </div>
         </div>
     </div>
@@ -38,7 +39,7 @@
                 <div class="">
                     <p class="text-danger"><strong>¿Está seguro que desea eliminar este Inquilino?</strong></p>
                     <form asp-action="Delete" method="post">
-                        <input type="hidden" name="id" value="@Model.IdPropietario">
+                        <input type="hidden" name="id" value="@Model.Id">
                         <input type="submit" class="btn btn-danger" value="Sí, eliminar">
                     </form>
                     <a asp-action="Index" class="btn btn-primary">No, Volver al listado</a>

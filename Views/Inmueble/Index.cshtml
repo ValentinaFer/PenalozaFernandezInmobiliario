@@ -1,4 +1,4 @@
-﻿@model IndexPropietarioViewModel
+﻿@model IndexInmuebleViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -6,7 +6,7 @@
 <div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
 
     <div class="col-12">
-        <h1 class="display-4 ">Propietarios</h1>
+        <h1 class="display-4 ">Inmuebles</h1>
         <a asp-action="Upsert" class="btn btn-primary text-light hover rounded-pill m-2 p-3"
             title="Agregar un nuevo Propietario">
             <p class="d-inline">Agregar nuevo Propietario</p><i class="bi bi-person-add ps-1"></i>
@@ -15,7 +15,7 @@
         @Html.Partial("_ToastModal")
     </div>
 
-    @if (Model.Propietarios.Any())
+    @if (Model.Inmuebles.Any())
     {
         <div class="col">
             <div class="table-responsive-lg">
@@ -23,19 +23,22 @@
                     <thead class="text-secondary">
                         <tr>
                             <th>
-                                @Html.DisplayNameFor(model => model.Propietarios.FirstOrDefault().Nombre)
+                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Direccion)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.Propietarios.FirstOrDefault().Apellido)
+                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Ambientes)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.Propietarios.FirstOrDefault().Email)
+                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Latitud)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.Propietarios.FirstOrDefault().Telefono)
+                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Longitud)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.Propietarios.FirstOrDefault().Dni)
+                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Superficie)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Duenio)
                             </th>
                             <th class="text-end">
                                 Acciones
@@ -43,30 +46,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model.Propietarios)
+                        @foreach (var item in Model.Inmuebles)
                         {
                             <tr>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Nombre)
+                                    @Html.DisplayFor(modelItem => item.Direccion)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Apellido)
+                                    @Html.DisplayFor(modelItem => item.Ambientes)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Email)
+                                    @Html.DisplayFor(modelItem => item.Latitud)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Telefono)
+                                    @Html.DisplayFor(modelItem => item.Longitud)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Dni)
+                                    @Html.DisplayFor(modelItem => item.Superficie)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Duenio)
                                 </td>
                                 <td class="text-nowrap text-end">
-                                    <a asp-action="DetallePropietario" asp-route-id="@item.IdPropietario" title="Ver más"
+                                    <a asp-action="DetallePropietario" asp-route-id="@item.Id" title="Ver más"
                                         class="btn btn-info py-1 px-2"><i class="bi bi-person-vcard-fill text-light"></i></a>
-                                    <a asp-action="Upsert" asp-route-id="@item.IdPropietario" title="Editar"
+                                    <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar"
                                         class="btn btn-primary py-1 px-2"><i class="bi bi-pencil-fill text-light"></i></a>
-                                    <a asp-action="Eliminar" asp-route-id="@item.IdPropietario" title="Eliminar"
+                                    <a asp-action="Eliminar" asp-route-id="@item.Id" title="Eliminar"
                                         class="btn btn-danger py-1 px-2"><i class="bi bi-trash-fill text-light"></i></a>
                                 </td>
                             </tr>
@@ -89,7 +95,7 @@
     else
     {
         <div class="alert alert-warning" role="alert">
-            No hay propietarios disponibles.
+            No hay Inmuebles disponibles.
         </div>
 
 

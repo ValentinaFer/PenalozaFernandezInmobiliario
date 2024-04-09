@@ -6,15 +6,15 @@ using PenalozaFernandezInmobiliario.Models;
 
 namespace PenalozaFernandezInmobiliario.Controllers
 {
-    public class PropietarioController : Controller
+    public class InmuebleController : Controller
     {
-        private readonly ILogger<PropietarioController> _logger;
-        private readonly RepositorioPropietario rp;
+        private readonly ILogger<InmuebleController> _logger;
+        private readonly RepositorioInmueble rp;
 
-        public PropietarioController(ILogger<PropietarioController> logger)
+        public InmuebleController(ILogger<InmuebleController> logger)
         {
             _logger = logger;
-            rp = new RepositorioPropietario();
+            rp = new RepositorioInmueble();
         }
 
         public IActionResult Index(int pageNumber)
@@ -31,15 +31,15 @@ namespace PenalozaFernandezInmobiliario.Controllers
                     lista = rp.GetAllForIndex(10, pageNumber - 1);
                     pageNumber = pageNumber - 1;
                 }
-                IndexPropietarioViewModel vm = new()
+                IndexInmuebleViewModel vm = new()
                 {
-                    Propietarios = lista,
+                    Inmuebles = lista,
                     PageNumber = pageNumber
                 };
 
                 if (lista.Count == 0)
                 {
-                    vm.Error = "No hay propietarios disponibles.";
+                    vm.Error = "No hay Inmuebles disponibles.";
                 }
 
                 vm.ToastMessage = "";
@@ -53,7 +53,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cargar la lista de Propietarios");
+                _logger.LogError(ex, "Error al cargar la lista de Inmuebles");
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
         }
@@ -61,27 +61,27 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
         public IActionResult Upsert(int id)
         {
-            UpsertPropietarioViewModel viewModel = new();
-            //if el id es 0 quiere decir que se esta creado un Propietario,
-            //Se mandaria un ID especifico mayor a cero si se llegara a estar editando un Propietario(el inquilido dueño de dicho id)
+            UpsertInmuebleViewModel viewModel = new();
+            //if el id es 0 quiere decir que se esta creado un Inmueble,
+            //Se mandaria un ID especifico mayor a cero si se llegara a estar editando un Inmueble(el inquilido dueño de dicho id)
             try
             {
                 if (id > 0)
                 { //se lleva a view en modo de edicion
-                    viewModel.Propietario = rp.GetById(id);
-                    viewModel.Tittle = "Editando Propietario n°" + viewModel.Propietario.IdPropietario;
+                    viewModel.Inmueble = rp.GetById(id);
+                    viewModel.Tittle = "Editando Inmueble n°" + viewModel.Inmueble.Id;
                     return View(viewModel);
                 }
                 else
                 { //se lleva a view en modo de creacion
-                    viewModel.Tittle = "Creando Propietario";
-                    viewModel.Propietario = new Propietario();
+                    viewModel.Tittle = "Creando Inmueble";
+                    viewModel.Inmueble = new Inmueble();
                     return View(viewModel);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al buscar el Propietario");
+                _logger.LogError(ex, "Error al buscar el Inmueble");
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
 
@@ -89,20 +89,20 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
         //GIRL(me to me), don't forget to try catch the exception with the rest of the code
         [HttpPost]
-        public IActionResult Guardar(UpsertPropietarioViewModel PropietarioViewModel)
+        public IActionResult Guardar(UpsertInmuebleViewModel InmuebleViewModel)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     _logger.LogInformation("Model state is valid");
-                    if (PropietarioViewModel.Propietario.IdPropietario > 0)
+                    if (InmuebleViewModel.Inmueble.Id > 0)
                     {
-                        return RedirectToAction("Update", PropietarioViewModel.Propietario);
+                        return RedirectToAction("Update", InmuebleViewModel.Inmueble);
                     }
                     else
                     {
-                        return RedirectToAction("Create", PropietarioViewModel.Propietario);
+                        return RedirectToAction("Create", InmuebleViewModel.Inmueble);
                     }
                 }
                 else
@@ -116,33 +116,33 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
             }
 
-            _logger.LogInformation("Received data: {@PropietarioViewModel}", PropietarioViewModel.Propietario.Nombre);
+            _logger.LogInformation("Received data: {@InmuebleViewModel}", InmuebleViewModel.Inmueble.Id);
 
             return RedirectToAction("Index", new { pageNumber = 1 });
 
         }
 
         [HttpGet]
-        public IActionResult Create(Propietario Propietario)
+        public IActionResult Create(Inmueble Inmueble)
         {
             try
             {
-                var result = rp.Create(Propietario);
+                var result = rp.Create(Inmueble);
                 _logger.LogInformation("Create Result: {result}", result);
                 if (result > 0)
                 {
-                    TempData["ToastMessage"] = "Propietario creado con exito!";
+                    TempData["ToastMessage"] = "Inmueble creado con exito!";
                 }
                 else
                 {
-                    TempData["ToastMessage"] = "No se pudo crear el Propietario..";
+                    TempData["ToastMessage"] = "No se pudo crear el Inmueble..";
                 }
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al guardar"); //remember to be more specific here
-                TempData["Error"] = "Se produjo un error al crear el Propietario";
+                TempData["Error"] = "Se produjo un error al crear el Inmueble";
             }
             try
             {
@@ -150,32 +150,32 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al redirigir a Index de Propietarios");
-                TempData["Error"] = "Se produjo un error al redirigir a Index de Propietarios";
+                _logger.LogError(ex, "Error al redirigir a Index de Inmuebles");
+                TempData["Error"] = "Se produjo un error al redirigir a Index de Inmuebles";
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
             }
         }
 
         [HttpGet]
-        public IActionResult Update(Propietario Propietario)
+        public IActionResult Update(Inmueble Inmueble)
         {
             try
             {
-                var result = rp.Update(Propietario);
+                var result = rp.Update(Inmueble);
                 _logger.LogInformation("Update Result: {result}", result);
                 if (result > 0)
                 {
-                    TempData["ToastMessage"] = "Propietario editado con exito!";
+                    TempData["ToastMessage"] = "Inmueble editado con exito!";
                 }
                 else
                 {
-                    TempData["ToastMessage"] = "No se pudo editar el Propietario..";
+                    TempData["ToastMessage"] = "No se pudo editar el Inmueble..";
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al guardar"); //remember to be more specific here
-                TempData["Error"] = "Se produjo un error al editar el Propietario";
+                TempData["Error"] = "Se produjo un error al editar el Inmueble";
             }
             try
             {
@@ -183,8 +183,8 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al redirigir a Index de Propietarios");
-                TempData["Error"] = "Se produjo un error al redirigir a Index de Propietarios";
+                _logger.LogError(ex, "Error al redirigir a Index de Inmuebles");
+                TempData["Error"] = "Se produjo un error al redirigir a Index de Inmuebles";
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
             }
         }
@@ -199,17 +199,17 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 _logger.LogInformation("Update Result: {result}", result);
                 if (result > 0)
                 {
-                    TempData["ToastMessage"] = "Propietario eliminado con exito!";
+                    TempData["ToastMessage"] = "Inmueble eliminado con exito!";
                 }
                 else
                 {
-                    TempData["ToastMessage"] = "No se pudo eliminar el Propietario..";
+                    TempData["ToastMessage"] = "No se pudo eliminar el Inmueble..";
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al eliminar"); //remember to be more specific here
-                TempData["Error"] = "Se produjo un error al eliminar el Propietario";
+                TempData["Error"] = "Se produjo un error al eliminar el Inmueble";
             }
             try
             {
@@ -217,8 +217,8 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al redirigir a Index de Propietarios");
-                TempData["Error"] = "Se produjo un error al redirigir a Index de Propietarios";
+                _logger.LogError(ex, "Error al redirigir a Index de Inmuebles");
+                TempData["Error"] = "Se produjo un error al redirigir a Index de Inmuebles";
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
             }
         }
@@ -227,13 +227,13 @@ namespace PenalozaFernandezInmobiliario.Controllers
         [HttpGet]
         public IActionResult Eliminar(int id)
         {
-            return RedirectToAction("DetallePropietario", new { id = id, eliminateFlag = true });
+            return RedirectToAction("DetalleInmueble", new { id = id, eliminateFlag = true });
         }
 
-        //Shows the view with the data of the selected Propietario
+        //Shows the view with the data of the selected Inmueble
         //if there's a flag in the viewdata, it means that it's a redirect from the button to delete, thus it the flag to show a form to confirm deletion
         [HttpGet]
-        public IActionResult DetallePropietario(int id, bool eliminateFlag = false)
+        public IActionResult DetalleInmueble(int id, bool eliminateFlag = false)
         {
             try
             {
@@ -258,8 +258,8 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al redirigir a Index de Propietarios");
-                TempData["Error"] = "Se produjo un error al redirigir a Index de Propietarios";
+                _logger.LogError(ex, "Error al redirigir a Index de Inmuebles");
+                TempData["Error"] = "Se produjo un error al redirigir a Index de Inmuebles";
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
 
             }
