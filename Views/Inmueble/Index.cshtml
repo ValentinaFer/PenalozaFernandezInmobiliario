@@ -38,7 +38,7 @@
                                 @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Superficie)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Duenio)
+                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().PropietarioId)
                             </th>
                             <th class="text-end">
                                 Acciones
@@ -65,7 +65,7 @@
                                     @Html.DisplayFor(modelItem => item.Superficie)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Duenio)
+                                    @(item.Duenio.Nombre + " " + item.Duenio.Apellido)
                                 </td>
                                 <td class="text-nowrap text-end">
                                     <a asp-action="DetallePropietario" asp-route-id="@item.Id" title="Ver más"
