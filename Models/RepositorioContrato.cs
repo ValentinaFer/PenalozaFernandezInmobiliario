@@ -50,12 +50,12 @@ public class RepositorioContrato
                             Inmueble = new Inmueble{
                                 Id = reader.GetInt32(string.Concat("inm.", nameof(Inmueble.Id))),
                                 Direccion = reader.GetString(string.Concat("inm.", nameof(Inmueble.Direccion))),
-                                Propietario = new Propietario{
+                                /*Propietario = new Propietario{
                                     IdPropietario = reader.GetInt32(string.Concat("p.", nameof(Propietario.IdPropietario))),
                                     Apellido = reader.GetString(string.Concat("p.", nameof(Propietario.Apellido))),
                                     Nombre = reader.GetString(string.Concat("p.", nameof(Propietario.Nombre))),
                                     Dni = reader.GetString(string.Concat("p.", nameof(Propietario.Dni))),
-                                }
+                                }*/
                             }
 
                         });
