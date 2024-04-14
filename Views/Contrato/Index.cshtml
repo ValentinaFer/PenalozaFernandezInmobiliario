@@ -1,0 +1,74 @@
+@model IndexContratoViewModel;
+@{
+    ViewData["Title"] = "Home Page";
+
+}
+
+<div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
+
+    <div class="col-12">
+        <h1 class="display-4 ">Contratos</h1>
+        <partial name="_ToastModal" />
+
+        <a asp-action="Index" asp-controller="Inmueble" class="btn btn-primary text-light hover rounded-pill mb-3 p-3"
+            title="Agregar un nuevo Contrato">
+            <p class="d-inline">Agregar nuevo Contrato</p><i class="bi bi-person-add ps-1"></i>
+        </a>
+    </div>
+    <div class="col">
+
+    </div>
+    <div class="col-12">
+
+        @foreach (var contrato in Model.Contratos){
+            
+        } else {
+
+        }
+        <div class="row">
+            <div class="col-12 col-sm-6 col-lg-4 p-4 position-relative text-start shadow rounded">
+                <div>
+                    <!--<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info p-3"><i
+                            class="bi bi-house-door"></i></span>-->
+
+                    <p class="text-end small">Contrato n°</p>
+                </div>
+                <div>
+                    <p>Departamento</p>
+                    <p>Argentina, San Luis, San Luis, asdf 12</p>
+                    <p>$45.000/mes</p>
+                    <p>23/04/24 - 23/04/25</p>
+                     </div>
+                <div class="row">
+                    <div class="col-6 border-end">
+                        <h6>Propietario</h6>
+                        <p>Young Florence</p>
+                        <p>33.345.432</p>
+                    </div>
+                    <div class="col-6">
+                        <h6>Inquilino</h6>
+                        <p>Young Florence</p>
+                        <p>33.345.432</p>
+                    </div><div class="col-6">
+                        <a class="btn btn-outline-danger border-0 btn-sm rounded-4 align-bottom">Eliminar</a>
+                        <a class="btn btn-outline-info border-info-subtle btn-sm rounded-4 align-bottom">Ver más</a>
+                    </div>
+                    <div class="col-6 pt-2 text-end">
+                        <a class="btn btn-success btn-lg rounded-5 px-4">Pagar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (ViewData["TablaVacia"] != null && ViewData["TablaVacia"].ToString() != "")
+        {
+            <text>
+                <li scope="row">
+                    <p class="text-center">@ViewData["TablaVacia"]</p>
+                </li>
+            </text>
+        }
+
+    </div>
+
+</div>

@@ -28,6 +28,7 @@
 
     var form = document.getElementById("myForm");
     var nameInput = document.getElementById("name");
+    nameInput.focus();
     var lastNameInput = document.getElementById("last-name");
     var emailInput = document.getElementById("email");
     var phoneInput = document.getElementById("phone");

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using MySql.Data.MySqlClient;
 using PenalozaFernandezInmobiliario.Models;
 
 namespace PenalozaFernandezInmobiliario.Controllers;
@@ -16,7 +17,7 @@ public class InquilinoController : Controller
         rp = new RepositorioInquilino();
     }
 
-    public IActionResult Index(int pageNumber = 1)
+    public IActionResult Index(int pageNumber = 1) //consider receiving list of Inquilinos to show(to show ALL Inquilinos, or filtered ones, for example)
     {
         try
         {
@@ -39,7 +40,7 @@ public class InquilinoController : Controller
         {
             _logger.LogError(ex, "Error al cargar la lista de inquilinos");
             return RedirectToAction("Error", new { codigo = 500 });
-            //return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            
         }
 
     }
@@ -105,8 +106,8 @@ public class InquilinoController : Controller
                     return View(viewModel);
                 }
         } catch (Exception ex){
-            _logger.LogError(ex, "Error al buscar el inquilino");
-            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            _logger.LogError(ex, "Error al recuperar el inquilino");
+            return RedirectToAction("Index");
         }
         
     }
@@ -143,7 +144,7 @@ public class InquilinoController : Controller
 
         _logger.LogInformation("Received data for update/create: {@InquilinoViewModel}", inquilinoViewModel.Inquilino.Nombre);
 
-        return RedirectToAction("Index", new { pageNumber = 1 });
+        return RedirectToAction("Index");
 
     }
 
@@ -163,7 +164,7 @@ public class InquilinoController : Controller
             TempData["Error"] = "Se produjo un error al crear el inquilino";
         }
         try{
-        return RedirectToAction("Index", new { pageNumber = 1 });
+        return RedirectToAction("Index");
         } catch (Exception ex){
             _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
             TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
@@ -186,7 +187,7 @@ public class InquilinoController : Controller
             TempData["Error"] = "Se produjo un error al editar el inquilino";
         }
         try{
-        return RedirectToAction("Index", new { pageNumber = 1 });
+        return RedirectToAction("Index");
         } catch (Exception ex){
             _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
             TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
@@ -210,7 +211,7 @@ public class InquilinoController : Controller
             TempData["Error"] = "Se produjo un error al eliminar el inquilino";
         }
         try{
-        return RedirectToAction("redirectToIndex");
+        return RedirectToAction("Index");
         } catch (Exception ex){
             _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
             TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
@@ -218,45 +219,36 @@ public class InquilinoController : Controller
         }
     }
 
-    //the call from the button to delete
-    [HttpGet]
-    public IActionResult Eliminar(int id)
-    {
-        return RedirectToAction("DetalleInquilino", new { id = id , eliminateFlag = true });
-    }
-
     //Shows the view with the data of the selected inquilino
-    //if there's a flag in the viewdata, it means that it's a redirect from the button to delete, thus is the flag to show a form to confirm deletion
+    //if there's a flag in the viewdata, it means that it's attempting to delete the Inquilino
     [HttpGet]
-    public IActionResult DetalleInquilino(int id, bool eliminateFlag = false)
+    public IActionResult RenderDetalleInquilino(int id, bool eliminateFlag = false)
     {
         try{
             if (id > 0)
             {
-                if (eliminateFlag){
-                    ViewData["EliminandoFlag"] = true;
-                } else {
-                    ViewData["EliminandoFlag"] = false;
-                }
-                _logger.LogInformation("Received flag: {flag}", ViewData["EliminandoFlag"]);
+                ViewData["EliminandoFlag"] = eliminateFlag;
                 var inq = rp.GetById(id);
-                return View(inq);
+                if (inq == null){
+                    _logger.LogError("Se obtuvo un inquilino nulo");
+                    TempData["Error"] = "Se produjo un error al obtener el inquilino";
+                    return RedirectToAction("Error", new { codigo = 404 });
+                }
+                return View("DetalleInquilino",inq);
             }
             else
             {
-                return RedirectToAction("Index", new { pageNumber = 1 });
+                return RedirectToAction("Index");
             }
-        }catch(Exception ex)
+        }catch(MySqlException ex)
         {
-            _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
+            TempData["Error"] = "Se produjo un error al obtener el inquilino";
+            _logger.LogError(ex, "Error al obtener el inquilino");
+            return RedirectToAction("Error", new { codigo = 500 });
+        } catch(HttpRequestException){
+            _logger.LogError("Error durante el request al obtener el inquilino");
             TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
-            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
-
+            return RedirectToAction("Error", new { codigo = 500 });
         }
-    }
-
-    public IActionResult redirectToIndex()
-    {
-        return RedirectToAction("Index", new { pageNumber = 1 });
     }
 }
