@@ -30,7 +30,7 @@ function isUnderRange(value, maxLength, minLength){
  * @returns true if the value is only letters, false otherwise.
  */
 function isOnlyLetters(value){
-    if (/^[a-zA-ZÀ-ÖØ-öø-ÿ\s]+$/.test(value)) {
+    if (/^[a-zA-ZÀ-ÖØ-öø-ÿ\s\']+$/.test(value)) {
         return true;
     } else {
         return false;

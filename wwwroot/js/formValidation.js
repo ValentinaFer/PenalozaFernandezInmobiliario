@@ -21,7 +21,7 @@
         phone_empty: "Por favor, ingrese el teléfono del inquilino",
         phone_invalid: "Por favor, ingrese un teléfono válido, solo números", //discussion needed about format
         dni_empty: "Por favor, ingrese el DNI del inquilino",
-        //dni_invalid: "Por favor, ingrese un DNI válido", //discussion needed about format
+        dni_invalid: "Por favor, ingrese un DNI válido, solo números",
         address_empty: "Por favor, ingrese la dirección del inquilino",
         //address_invalid: "Por favor, ingrese una dirección válida", //discussion needed about format
     };
@@ -35,22 +35,26 @@
     var dniInput = document.getElementById("dni");
     var addressInput = document.getElementById("address");
 
+    function triggerCheck() {
+        var inputEvent = new Event("input", {
+            bubbles: true,
+            cancelable: true
+        });
+        nameInput.dispatchEvent(inputEvent);
+        lastNameInput.dispatchEvent(inputEvent);
+        emailInput.dispatchEvent(inputEvent);
+        phoneInput.dispatchEvent(inputEvent);
+        dniInput.dispatchEvent(inputEvent);
+        addressInput.dispatchEvent(inputEvent);
+    }
+
     form.addEventListener("submit", function (event) {
         event.preventDefault();
         console.log("processing...");
         if (fields.isReady()) {
             form.submit();
         } else {
-            var inputEvent = new Event("input", {
-                bubbles: true,
-                cancelable: true
-            });
-            nameInput.dispatchEvent(inputEvent);
-            lastNameInput.dispatchEvent(inputEvent);
-            emailInput.dispatchEvent(inputEvent);
-            phoneInput.dispatchEvent(inputEvent);
-            dniInput.dispatchEvent(inputEvent);
-            addressInput.dispatchEvent(inputEvent);
+            triggerCheck();
         }
     });
 
@@ -138,8 +142,14 @@
             addRemoveClasses(this, "is-invalid", "is-valid");
             fields.dni = false;
         } else {
-            addRemoveClasses(this, "is-valid", "is-invalid");
-            fields.dni = true;
+            if (!isNumber(this.value)) {
+                addErrorItem("dni-feedback", messages.dni_invalid, ["text-danger", "list-group-item"]);
+                addRemoveClasses(this, "is-invalid", "is-valid");
+                fields.dni = false;
+            } else {
+                addRemoveClasses(this, "is-valid", "is-invalid");
+                fields.dni = true;
+            }
         }
     });
 
@@ -156,5 +166,9 @@
         }
     });
 
+    if (nameInput.value.trim() !== "" && lastNameInput.value.trim() !== "") { //si hay algo en el input(lo que quiere decir que se cargo la vista en modo update!) se hace una validacion "triggered manually"
+        triggerCheck();
+        console.log("checked");
+    }
 })
 

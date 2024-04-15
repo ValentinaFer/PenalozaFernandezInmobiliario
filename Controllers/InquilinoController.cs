@@ -96,8 +96,14 @@ public class InquilinoController : Controller
             if (id > 0)
                 { //se lleva a view en modo de edicion
                     viewModel.Inquilino = rp.GetById(id);
-                    viewModel.Tittle = "Editando Inquilino n°" + viewModel.Inquilino.Id;
-                    return View(viewModel);
+                    if (viewModel.Inquilino != null){
+                        viewModel.Tittle = "Editando Inquilino n°" + viewModel.Inquilino.Id;
+                        return View(viewModel);
+                    } else {
+                        TempData["Error"] = "No se pudo recuperar el inquilino seleccionado..";
+                        return RedirectToAction("Index");
+                    }
+                                       
                 }
                 else
                 { //se lleva a view en modo de creacion

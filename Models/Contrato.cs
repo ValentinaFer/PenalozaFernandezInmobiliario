@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 
 namespace PenalozaFernandezInmobiliario.Models;
 
@@ -38,5 +39,19 @@ public class Contrato
 
 
     public bool Estado { get; set;}
+
+    public static string GetTableName()
+    {
+        Type type = typeof(Contrato);
+        if (type.GetCustomAttributes(typeof(TableAttribute), true).FirstOrDefault() is TableAttribute tableAttribute)
+        {
+            return tableAttribute.Name;
+        }
+        return type.Name;
+    }
+
+    public string GetFechaFormateada(DateTime date){
+        return date.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("es-ES"));
+    }
 
 }

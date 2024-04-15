@@ -20,12 +20,56 @@
     </div>
     <div class="col-12">
 
-        @foreach (var contrato in Model.Contratos){
-            
-        } else {
-
-        }
         <div class="row">
+        @if (Model.Contratos != null){
+            @foreach (var contrato in Model.Contratos){
+                if (contrato.Inmueble != null && /*contrato.Inmueble.Duenio != null &&*/ contrato.Inquilino != null){
+
+                    <div class="col-12 col-sm-6 col-lg-4 p-4 position-relative text-start shadow rounded">
+                        <div>
+                            <!--<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info p-3"><i
+                                    class="bi bi-house-door"></i></span>-->
+
+                            <p class="text-end small">Contrato n° @contrato.Id</p>
+                        </div>
+
+                        <div class="">
+                            <p>Departamento</p>
+                            <p><i class="bi bi-geo-alt-fill"></i> @Html.DisplayFor(contratoItem => contrato.Inmueble.Direccion)</p>
+                            <p>@contrato.GetFechaFormateada(contrato.FechaDesde) - @contrato.GetFechaFormateada(contrato.FechaHasta)</p>
+                            <p>$45.000/mes</p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 border-end">
+                                <h6>Propietario</h6>
+                                <p>apellido, nombre, dni...</p>
+                                <p>33.345.432</p>
+                            </div>
+
+                            <div class="col-6">
+                                <h6>Inquilino</h6>
+                                <p>@contrato.Inquilino.ToString()</p>
+                            </div>
+
+                            <div class="col-6">
+                                <a class="btn btn-outline-danger border-0 btn-sm rounded-4 align-bottom">Eliminar</a>
+                                <a class="btn btn-outline-info border-info-subtle btn-sm rounded-4 align-bottom">Ver más</a>
+                            </div>
+
+                            <div class="col-6 pt-2 text-end">
+                                <a class="btn btn-success btn-lg rounded-5 px-4">Pagar</a>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                }
+                
+            }
+        }
+        
+       
             <div class="col-12 col-sm-6 col-lg-4 p-4 position-relative text-start shadow rounded">
                 <div>
                     <!--<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info p-3"><i
@@ -59,15 +103,6 @@
                 </div>
             </div>
         </div>
-
-        @if (ViewData["TablaVacia"] != null && ViewData["TablaVacia"].ToString() != "")
-        {
-            <text>
-                <li scope="row">
-                    <p class="text-center">@ViewData["TablaVacia"]</p>
-                </li>
-            </text>
-        }
 
     </div>
 

@@ -16,20 +16,16 @@ public class ContratoController : Controller
         rp = new RepositorioContrato();
     }
 
-    public IActionResult Index(List<Contrato> lista, int pageNumber = 1)
+    public IActionResult Index(IList<Contrato> lista, int pageNumber = 1)
     {
         try
         {
             var vm = new IndexContratoViewModel();
-            vm.Contratos = new List<Contrato>();
-            if (lista == null) //Coming from Home
+            if (lista.Count == 0) //Coming from Home
             {
-                
-                //lista = rp.GetAllForIndex();
+                lista = rp.GetAllForIndex(10, 1);
+                vm.Contratos = lista;
                 return View(vm);
-            }
-            if (lista.Count == 0){
-                //lista = rp.GetAllForIndex();
             }
             
             return View(vm);

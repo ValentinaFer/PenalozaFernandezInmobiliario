@@ -6,6 +6,7 @@ namespace PenalozaFernandezInmobiliario.Models;
 [Table("Inquilinos")]
 public class Inquilino
 {
+
     [Key]
     [Display(Name = "Código Int.")]
     public int Id { get; set;}
@@ -32,4 +33,18 @@ public class Inquilino
     [Display(Name = "Activo")]
     public bool Estado { get; set;}
 
+    public static string GetTableName()
+    {
+        Type type = typeof(Inquilino);
+        if (type.GetCustomAttributes(typeof(TableAttribute), true).FirstOrDefault() is TableAttribute tableAttribute)
+        {
+            return tableAttribute.Name;
+        }
+        return type.Name;
+    }
+
+    public override string ToString()
+    {
+        return $"{Apellido}, {Nombre}, {Dni}.";
+    }
 }
