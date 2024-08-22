@@ -1,7 +1,8 @@
-﻿@model UpsertInmuebleViewModel;
+﻿@model UpsertInmuebleViewModel
+
 @{
     ViewData["Title"] = "Home Page";
-    int id = Model.Inmueble == null ? 0 : Model.Inmueble.Id;
+    int id = Model.Inmueble == null ? 0 : Model.Inmueble.IdInmueble;
 }
 
 <div class="container-fluid">
@@ -12,8 +13,7 @@
             <form asp-action="Guardar" method="post">
                 <div asp-validation-summary="ModelOnly"></div>
                 <div class="form-group">
-
-                    <input type="hidden" asp-for=Inmueble.Id class="form-control" readonly>
+                    <input type="hidden" asp-for="Inmueble.IdInmueble" class="form-control" readonly>
                 </div>
                 <div class="form-group">
                     <label asp-for="Inmueble.Direccion" class="control-label"></label>
@@ -41,9 +41,22 @@
                     <span asp-validation-for="Inmueble.Superficie" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="Inmueble.Duenio" class="control-label"></label>
-                    <input asp-for="Inmueble.Duenio" class="form-control">
-                    <span asp-validation-for="Inmueble.Duenio" class="text-danger"></span>
+                    <label asp-for="Inmueble.IdPropietario" class="control-label">Nombre del propietario</label>
+                    <select asp-for="Inmueble.IdPropietario" class="form-select" name="inmueble.IdPropietario">
+                        @foreach (var item in ViewBag.Propietarios)
+                        {
+                            @if (Model.Inmueble != null && Model.Inmueble.Duenio != null && Model.Inmueble.Duenio.Nombre ==
+                           item.Nombre)
+                            {
+                                <option selected value="@item.IdPropietario">@item.Nombre @item.Apellido</option>
+                            }
+                            else
+                            {
+                                <option value="@item.IdPropietario">@(item.Nombre) @(item.Apellido)</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="Inmueble.IdPropietario" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <input type="submit" value="Guardar" class="btn btn-primary m-2">

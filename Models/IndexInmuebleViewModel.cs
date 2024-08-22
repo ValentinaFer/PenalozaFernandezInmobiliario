@@ -3,6 +3,7 @@ using PenalozaFernandezInmobiliario.Models;
 public class IndexInmuebleViewModel
 {
     public IEnumerable<Inmueble>? Inmuebles { get; set; }
+    public IEnumerable<Propietario>? Propietarios { get; set; }
     public int PageNumber { get; set; }
 
     public string? ToastMessage { get; set; }

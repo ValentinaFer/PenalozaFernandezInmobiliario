@@ -153,4 +153,34 @@ public class RepositorioPropietario
         return result;
     }
 
+    public IList<Propietario> GetAll()
+    {
+        var propietarios = new List<Propietario>();
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = "SELECT IdPropietario, Nombre, Apellido, Dni, Telefono, Email FROM Propietarios WHERE Estado = 1";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                connection.Open();
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        propietarios.Add(new Propietario
+                        {
+                            IdPropietario = reader.GetInt32(reader.GetOrdinal(nameof(Propietario.IdPropietario))),
+                            Nombre = reader.GetString(reader.GetOrdinal(nameof(Propietario.Nombre))),
+                            Apellido = reader.GetString(reader.GetOrdinal(nameof(Propietario.Apellido))),
+                            Dni = reader.GetString(reader.GetOrdinal(nameof(Propietario.Dni))),
+                            Telefono = reader.GetString(reader.GetOrdinal(nameof(Propietario.Telefono))),
+                            Email = reader.GetString(reader.GetOrdinal(nameof(Propietario.Email)))
+                        });
+                    }
+                }
+            }
+        }
+        return propietarios;
+    }
+
 }

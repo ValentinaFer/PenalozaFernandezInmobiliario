@@ -6,18 +6,25 @@ namespace PenalozaFernandezInmobiliario.Models
     [Table("Inmuebles")]
     public class Inmueble
     {
-        public int Id { get; set; }
+        public int IdInmueble { get; set; }
         public string? Direccion { get; set; }
         public int Ambientes { get; set; }
         public int Superficie { get; set; }
         public decimal Latitud { get; set; }
         public decimal Longitud { get; set; }
+        public decimal Precio { get; set; }
 
         [DisplayName("Dueño")]
-        public int PropietarioId { get; set; }
+        public int IdPropietario { get; set; }
 
-        [ForeignKey(nameof(PropietarioId))]
+        [ForeignKey(nameof(IdPropietario))]
         public Propietario? Duenio { get; set; }
+
+        [DisplayName("Tipo de Inmueble")]
+        public int IdTipoInmueble { get; set; }
+
+        [ForeignKey(nameof(IdTipoInmueble))]
+        public TipoInmueble? Tipo { get; set; }
         public bool Estado { get; set; }
     }
 }

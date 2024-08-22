@@ -9,36 +9,36 @@ public class Contrato
 {
     [Key]
     [Display(Name = "Código Int.")]
-    public int Id { get; set;}
-    
+    public int Id { get; set; }
+
     [Required]
     [Display(Name = "Fecha de inicio")]
-    public DateTime FechaDesde { get; set;}
+    public DateTime FechaDesde { get; set; }
 
     [Required]
     [Display(Name = "Fecha estipulada de finalización")]
-    public DateTime FechaHasta { get; set;}
+    public DateTime FechaHasta { get; set; }
     [Display(Name = "Fecha de finalización")]
-    public DateTime FechaFinalizacion { get; set;}
-    public decimal Monto{ get; set;} //Monto mensual, no total, el total puede ser calculado en base a la cant de meses
+    public DateTime FechaFinalizacion { get; set; }
+    public decimal Monto { get; set; } //Monto mensual, no total, el total puede ser calculado en base a la cant de meses
 
 
     [Display(Name = "Inquilino")]
-    public int InquilinoId { get; set;}
+    public int InquilinoId { get; set; }
 
     [ForeignKey(nameof(InquilinoId))]
-    public Inquilino? Inquilino { get; set;}
+    public Inquilino? Inquilino { get; set; }
 
 
 
     [Display(Name = "Inmueble")]
-    public int InmuebleId { get; set;}
+    public int InmuebleId { get; set; }
 
     [ForeignKey(nameof(InmuebleId))]
-    public Inmueble? Inmueble { get; set;}
+    public Inmueble? Inmueble { get; set; }
 
 
-    public bool Estado { get; set;}
+    public bool Estado { get; set; }
 
     public static string GetTableName()
     {
@@ -50,7 +50,8 @@ public class Contrato
         return type.Name;
     }
 
-    public string GetFechaFormateada(DateTime date){
+    public string GetFechaFormateada(DateTime date)
+    {
         return date.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("es-ES"));
     }
 

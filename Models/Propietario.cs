@@ -21,5 +21,9 @@ public class Propietario
     [Required(ErrorMessage = "Por favor, ingrese el {0} del propietario")]
     public string? Domicilio { get; set; }
     public bool Estado { get; set; }
+    public override string ToString()
+    {
+        return $"{Apellido} {Nombre}";
+    }
 
 }

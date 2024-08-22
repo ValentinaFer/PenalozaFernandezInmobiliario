@@ -9,12 +9,16 @@ namespace PenalozaFernandezInmobiliario.Controllers
     public class InmuebleController : Controller
     {
         private readonly ILogger<InmuebleController> _logger;
-        private readonly RepositorioInmueble rp;
+        private readonly RepositorioInmueble ri;
+        private readonly RepositorioPropietario rp;
+        private readonly RepositorioTipoInmueble ti;
 
         public InmuebleController(ILogger<InmuebleController> logger)
         {
             _logger = logger;
-            rp = new RepositorioInmueble();
+            ri = new RepositorioInmueble();
+            rp = new RepositorioPropietario();
+            ti = new RepositorioTipoInmueble();
         }
 
         public IActionResult Index(int pageNumber)
@@ -25,19 +29,27 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 {
                     pageNumber = 1;
                 }
-                var lista = rp.GetAllForIndex(10, pageNumber);
-                if (lista.Count == 0)
+
+                // Obtener la lista de inmuebles
+                var listaInmuebles = ri.GetAllForIndex(10, pageNumber);
+                if (listaInmuebles.Count == 0)
                 {
-                    lista = rp.GetAllForIndex(10, pageNumber - 1);
+                    listaInmuebles = ri.GetAllForIndex(10, pageNumber - 1);
                     pageNumber = pageNumber - 1;
                 }
+
+
+
+
+
+
                 IndexInmuebleViewModel vm = new()
                 {
-                    Inmuebles = lista,
+                    Inmuebles = listaInmuebles,
                     PageNumber = pageNumber
                 };
 
-                if (lista.Count == 0)
+                if (listaInmuebles.Count == 0)
                 {
                     vm.Error = "No hay Inmuebles disponibles.";
                 }
@@ -59,22 +71,43 @@ namespace PenalozaFernandezInmobiliario.Controllers
         }
 
 
+
         public IActionResult Upsert(int id)
         {
-            UpsertInmuebleViewModel viewModel = new();
+            UpsertInmuebleViewModel viewModel = new UpsertInmuebleViewModel();
             //if el id es 0 quiere decir que se esta creado un Inmueble,
             //Se mandaria un ID especifico mayor a cero si se llegara a estar editando un Inmueble(el inquilido dueño de dicho id)
             try
             {
+
+
+                var listaPropietarios = rp.GetAll();
+                var listaTipoInmueble = ti.GetTipoInmuebles();
+
                 if (id > 0)
                 { //se lleva a view en modo de edicion
-                    viewModel.Inmueble = rp.GetById(id);
-                    viewModel.Tittle = "Editando Inmueble n°" + viewModel.Inmueble.Id;
-                    return View(viewModel);
+
+
+                    viewModel.Inmueble = ri.GetById(id);
+                    if (viewModel.Inmueble != null)
+                    {
+                        ViewBag.TipoInmuebles = listaTipoInmueble;
+                        ViewBag.Propietarios = listaPropietarios;
+                        viewModel.Tittle = "Editando Inquilino n°" + viewModel.Inmueble.IdInmueble;
+                        return View(viewModel);
+                    }
+                    else
+                    {
+                        TempData["Error"] = "No se pudo recuperar el inquilino seleccionado..";
+                        return RedirectToAction("Index");
+                    }
                 }
+
                 else
                 { //se lleva a view en modo de creacion
                     viewModel.Tittle = "Creando Inmueble";
+                    ViewBag.TipoInmuebles = listaTipoInmueble;
+                    ViewBag.Propietarios = listaPropietarios;
                     viewModel.Inmueble = new Inmueble();
                     return View(viewModel);
                 }
@@ -96,7 +129,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 if (ModelState.IsValid)
                 {
                     _logger.LogInformation("Model state is valid");
-                    if (InmuebleViewModel.Inmueble.Id > 0)
+                    if (InmuebleViewModel.Inmueble.IdInmueble > 0)
                     {
                         return RedirectToAction("Update", InmuebleViewModel.Inmueble);
                     }
@@ -116,7 +149,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
             }
 
-            _logger.LogInformation("Received data: {@InmuebleViewModel}", InmuebleViewModel.Inmueble.Id);
+            _logger.LogInformation("Received data: {@InmuebleViewModel}", InmuebleViewModel.Inmueble.IdInmueble);
 
             return RedirectToAction("Index", new { pageNumber = 1 });
 
@@ -127,7 +160,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
         {
             try
             {
-                var result = rp.Create(Inmueble);
+                var result = ri.Create(Inmueble);
                 _logger.LogInformation("Create Result: {result}", result);
                 if (result > 0)
                 {
@@ -157,11 +190,11 @@ namespace PenalozaFernandezInmobiliario.Controllers
         }
 
         [HttpGet]
-        public IActionResult Update(Inmueble Inmueble)
+        public IActionResult Update(Inmueble inmueble)
         {
             try
             {
-                var result = rp.Update(Inmueble);
+                var result = ri.Update(inmueble);
                 _logger.LogInformation("Update Result: {result}", result);
                 if (result > 0)
                 {
@@ -169,22 +202,22 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 }
                 else
                 {
-                    TempData["ToastMessage"] = "No se pudo editar el Inmueble..";
+                    TempData["ToastMessage"] = "No se pudo editar el inmueble..";
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al guardar"); //remember to be more specific here
-                TempData["Error"] = "Se produjo un error al editar el Inmueble";
+                TempData["Error"] = "Se produjo un error al editar el inquilino";
             }
             try
             {
-                return RedirectToAction("Index", new { pageNumber = 1 });
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al redirigir a Index de Inmuebles");
-                TempData["Error"] = "Se produjo un error al redirigir a Index de Inmuebles";
+                _logger.LogError(ex, "Error al redirigir a Index de inquilinos");
+                TempData["Error"] = "Se produjo un error al redirigir a Index de inquilinos";
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
             }
         }
@@ -195,7 +228,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
             try
             {
                 _logger.LogInformation("Delete id: {id}", id);
-                var result = rp.Delete(id);
+                var result = ri.Delete(id);
                 _logger.LogInformation("Update Result: {result}", result);
                 if (result > 0)
                 {
@@ -223,45 +256,45 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
         }
 
-        //the call from the button to delete
+
         [HttpGet]
         public IActionResult Eliminar(int id)
         {
             return RedirectToAction("DetalleInmueble", new { id = id, eliminateFlag = true });
         }
 
-        //Shows the view with the data of the selected Inmueble
-        //if there's a flag in the viewdata, it means that it's a redirect from the button to delete, thus it the flag to show a form to confirm deletion
+
+
         [HttpGet]
-        public IActionResult DetalleInmueble(int id, bool eliminateFlag = false)
+        public IActionResult InmuebleDetalles(int id)
         {
             try
             {
-                if (id > 0)
+                var inmueble = ri.GetById(id);
+
+                if (inmueble == null)
                 {
-                    if (eliminateFlag)
-                    {
-                        ViewData["EliminandoFlag"] = true;
-                    }
-                    else
-                    {
-                        ViewData["EliminandoFlag"] = false;
-                    }
-                    _logger.LogInformation("Received flag: {flag}", ViewData["EliminandoFlag"]);
-                    var inq = rp.GetById(id);
-                    return View(inq);
+                    _logger.LogWarning("Inmueble con ID {id} no encontrado.", id);
+                    return Json(new { success = false, message = "Inmueble no encontrado." });
                 }
-                else
+
+                var result = new
                 {
-                    return RedirectToAction("Index", new { pageNumber = 1 });
-                }
+                    Direccion = inmueble.Direccion,
+                    Ambientes = inmueble.Ambientes,
+                    Latitud = inmueble.Latitud.ToString("0.000000"),
+                    Longitud = inmueble.Longitud.ToString("0.000000"),
+                    Superficie = inmueble.Superficie,
+                    PropietarioNombre = $"{inmueble.Duenio?.Nombre} {inmueble.Duenio?.Apellido}"
+                };
+
+                _logger.LogInformation("Detalles del inmueble con ID {id} obtenidos correctamente.", id);
+                return Json(new { success = true, data = result });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al redirigir a Index de Inmuebles");
-                TempData["Error"] = "Se produjo un error al redirigir a Index de Inmuebles";
-                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
-
+                _logger.LogError(ex, "Error al obtener detalles del inmueble con ID {id}.", id);
+                return Json(new { success = false, message = "Ocurrió un error al obtener los detalles del inmueble." });
             }
         }
 
@@ -269,5 +302,16 @@ namespace PenalozaFernandezInmobiliario.Controllers
         {
             return RedirectToAction("Index", new { pageNumber = 1 });
         }
+
+
+        // public IActionResult MostrarMapa(decimal latitud, decimal longitud)
+        // {
+        //     ViewBag.Latitud = latitud;
+        //     ViewBag.Longitud = longitud;
+        //     return View();
+        // }
     }
+
+
+
 }

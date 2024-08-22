@@ -15,7 +15,7 @@
         @Html.Partial("_ToastModal")
     </div>
 
-    @if (Model.Inmuebles.Any())
+    @if (Model.Inmuebles != null && Model.Inmuebles.Any())
     {
         <div class="col">
             <div class="table-responsive-lg">
@@ -38,7 +38,7 @@
                                 @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Superficie)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().PropietarioId)
+                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().IdPropietario)
                             </th>
                             <th class="text-end">
                                 Acciones
@@ -56,10 +56,10 @@
                                     @Html.DisplayFor(modelItem => item.Ambientes)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Latitud)
+                                    @item.Latitud.ToString("0.000000")
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Longitud)
+                                    @item.Longitud.ToString("0.000000")
                                 </td>
                                 <td>
                                     @Html.DisplayFor(modelItem => item.Superficie)
@@ -68,11 +68,13 @@
                                     @(item.Duenio.Nombre + " " + item.Duenio.Apellido)
                                 </td>
                                 <td class="text-nowrap text-end">
-                                    <a asp-action="DetallePropietario" asp-route-id="@item.Id" title="Ver más"
-                                        class="btn btn-info py-1 px-2"><i class="bi bi-person-vcard-fill text-light"></i></a>
-                                    <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar"
+                                    <button type="button" class="btn btn-info py-1 px-2" data-bs-toggle="modal"
+                                        data-bs-target="#inmuebleModal" onclick="loadInmuebleDetails(@item.IdInmueble)">
+                                        <i class="bi bi-person-vcard-fill text-light"></i>
+                                    </button>
+                                    <a asp-action="Upsert" asp-route-id="@item.IdInmueble" title="Editar"
                                         class="btn btn-primary py-1 px-2"><i class="bi bi-pencil-fill text-light"></i></a>
-                                    <a asp-action="Eliminar" asp-route-id="@item.Id" title="Eliminar"
+                                    <a asp-action="Eliminar" asp-route-id="@item.IdInmueble" title="Eliminar"
                                         class="btn btn-danger py-1 px-2"><i class="bi bi-trash-fill text-light"></i></a>
                                 </td>
                             </tr>
@@ -97,27 +99,66 @@
         <div class="alert alert-warning" role="alert">
             No hay Inmuebles disponibles.
         </div>
-
-
-
-    }
-
-    @section Scripts {
-        @{
-            if (Model != null && Model.ToastMessage != null)
-            {
-                <text>
-                    <script>
-                        $(document).ready(function () {
-                            var toastMessage = "@Model.ToastMessage";
-                            if (toastMessage) {
-                                $("#toastMessage").text(toastMessage);
-                                $("#liveToast").toast("show");
-                            }
-                        })
-                    </script>
-                </text>
-            }
-        }
     }
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="inmuebleModal" tabindex="-1" aria-labelledby="inmuebleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inmuebleModalLabel">Detalles del Inmueble</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Dirección:</strong> <span id="modalDireccion"></span></p>
+                <p><strong>Ambientes:</strong> <span id="modalAmbientes"></span></p>
+                <p><strong>Latitud:</strong> <span id="modalLatitud"></span></p>
+                <p><strong>Longitud:</strong> <span id="modalLongitud"></span></p>
+                <p><strong>Superficie:</strong> <span id="modalSuperficie"></span></p>
+                <p><strong>Propietario:</strong> <span id="modalPropietario"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadInmuebleDetails(idInmueble) {
+            console.log("El id es " + idInmueble);
+
+            $.ajax({
+                url: '@Url.Action("InmuebleDetalles", "Inmueble")',
+                type: 'GET',
+                data: { id: idInmueble },
+                success: function (response) {
+                    if (response.success) {
+                        const data = response.data;
+
+
+
+                        $('#modalDireccion').text(data.direccion);
+                        $('#modalAmbientes').text(data.ambientes);
+                        $('#modalLatitud').text(data.latitud);
+                        $('#modalLongitud').text(data.longitud);
+                        $('#modalSuperficie').text(data.superficie);
+                        $('#modalPropietario').text(data.propietarioNombre);
+
+
+                        $('#inmuebleModal').modal('show');
+                        console.log(response);
+                        console.log(data)
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert('Ocurrió un error al obtener los detalles del inmueble.');
+                }
+            });
+        }
+    </script>
+}
