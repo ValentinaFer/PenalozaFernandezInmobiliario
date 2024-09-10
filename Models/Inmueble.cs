@@ -13,6 +13,7 @@ namespace PenalozaFernandezInmobiliario.Models
         public decimal Latitud { get; set; }
         public decimal Longitud { get; set; }
         public decimal Precio { get; set; }
+        public string? Uso { get; set; }
 
         [DisplayName("Dueño")]
         public int IdPropietario { get; set; }
@@ -25,6 +26,6 @@ namespace PenalozaFernandezInmobiliario.Models
 
         [ForeignKey(nameof(IdTipoInmueble))]
         public TipoInmueble? Tipo { get; set; }
-        public bool Estado { get; set; }
+        public string? Estado { get; set; }
     }
 }

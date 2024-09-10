@@ -13,5 +13,7 @@ public class IndexInmuebleViewModel
     public int TotalPages { get; set; }
 
     public int TotalEntries { get; set; }
-
+    public string Estado { get; set; }  // Para el filtro de estado
+    public int? PropietarioId { get; set; }  // Para el filtro de propietario
 }
+

@@ -1,19 +1,41 @@
 ﻿@model IndexInmuebleViewModel
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inmuebles";
 }
 
 <div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
-
     <div class="col-12">
         <h1 class="display-4 ">Inmuebles</h1>
         <a asp-action="Upsert" class="btn btn-primary text-light hover rounded-pill m-2 p-3"
-            title="Agregar un nuevo Propietario">
-            <p class="d-inline">Agregar nuevo Propietario</p><i class="bi bi-person-add ps-1"></i>
+            title="Agregar un nuevo Inmueble">
+            <p class="d-inline">Agregar nuevo inmueble</p><i class="bi bi-person-add ps-1"></i>
         </a>
 
         @Html.Partial("_ToastModal")
     </div>
+
+    <!-- Formulario para filtrar -->
+    <form asp-action="Index" method="get" class="mb-4">
+        <div class="row">
+            <!-- Select para el estado -->
+            <div class="col-md-4">
+                <select name="estado" class="form-control">
+
+                    <option value="Disponible">Disponible</option>
+                    <option value="No Disponible">No Disponible
+                    </option>
+                </select>
+            </div <!-- Campo para el ID del propietario -->
+
+
+            <!-- Botón para filtrar -->
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+        </div>
+    </form>
+
+
 
     @if (Model.Inmuebles != null && Model.Inmuebles.Any())
     {
@@ -22,60 +44,45 @@
                 <table class="table table-light text-start ">
                     <thead class="text-secondary">
                         <tr>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Direccion)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Ambientes)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Latitud)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Longitud)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Superficie)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().IdPropietario)
-                            </th>
-                            <th class="text-end">
-                                Acciones
-                            </th>
+                            <th>@Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Direccion)</th>
+                            <th>@Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Ambientes)</th>
+                            <th>Ubicación</th>
+                            <th>@Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Superficie)</th>
+                            <th>@Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().Precio)</th>
+                            <th>@Html.DisplayNameFor(model => model.Inmuebles.FirstOrDefault().IdPropietario)</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model.Inmuebles)
                         {
                             <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Direccion)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Ambientes)</td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Direccion)
+                                    <a href="https://www.google.com/maps?q=@item.Latitud,@item.Longitud" target="_blank"
+                                        title="Ver en Google Maps">
+                                        <i class="bi bi-geo-alt-fill" style="font-size: 1.5rem; color: #007bff;"></i>
+                                    </a>
                                 </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Ambientes)
-                                </td>
-                                <td>
-                                    @item.Latitud.ToString("0.000000")
-                                </td>
-                                <td>
-                                    @item.Longitud.ToString("0.000000")
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Superficie)
-                                </td>
-                                <td>
-                                    @(item.Duenio.Nombre + " " + item.Duenio.Apellido)
-                                </td>
+                                <td>@Html.DisplayFor(modelItem => item.Superficie)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Precio)</td>
+                                <td>@(item.Duenio.Nombre + " " + item.Duenio.Apellido)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Estado)</td>
                                 <td class="text-nowrap text-end">
                                     <button type="button" class="btn btn-info py-1 px-2" data-bs-toggle="modal"
                                         data-bs-target="#inmuebleModal" onclick="loadInmuebleDetails(@item.IdInmueble)">
                                         <i class="bi bi-person-vcard-fill text-light"></i>
                                     </button>
                                     <a asp-action="Upsert" asp-route-id="@item.IdInmueble" title="Editar"
-                                        class="btn btn-primary py-1 px-2"><i class="bi bi-pencil-fill text-light"></i></a>
+                                        class="btn btn-primary py-1 px-2">
+                                        <i class="bi bi-pencil-fill text-light"></i>
+                                    </a>
                                     <a asp-action="Eliminar" asp-route-id="@item.IdInmueble" title="Eliminar"
-                                        class="btn btn-danger py-1 px-2"><i class="bi bi-trash-fill text-light"></i></a>
+                                        class="btn btn-danger py-1 px-2">
+                                        <i class="bi bi-trash-fill text-light"></i>
+                                    </a>
                                 </td>
                             </tr>
                         }
@@ -85,10 +92,10 @@
 
             <div class="col">
                 <a class="btn btn-primary" asp-action="Index" title="Página anterior"
-                    asp-route-pageNumber="@(Model.PageNumber-1)">
+                    asp-route-pageNumber="@(Model.PageNumber - 1)">
                     <i class="bi bi-arrow-left"></i>
                 </a>
-                <a class="btn btn-primary" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber+1)">
+                <a class="btn btn-primary" asp-action="Index" asp-route-pageNumber="@(Model.PageNumber + 1)">
                     Siguiente <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -102,7 +109,7 @@
     }
 </div>
 
-<!-- Modal -->
+<!-- Modal para los detalles del inmueble -->
 <div class="modal fade" id="inmuebleModal" tabindex="-1" aria-labelledby="inmuebleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -117,6 +124,7 @@
                 <p><strong>Longitud:</strong> <span id="modalLongitud"></span></p>
                 <p><strong>Superficie:</strong> <span id="modalSuperficie"></span></p>
                 <p><strong>Propietario:</strong> <span id="modalPropietario"></span></p>
+                <p><strong>Uso:</strong> <span id="modalUso"></span></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -138,19 +146,15 @@
                     if (response.success) {
                         const data = response.data;
 
-
-
                         $('#modalDireccion').text(data.direccion);
                         $('#modalAmbientes').text(data.ambientes);
                         $('#modalLatitud').text(data.latitud);
                         $('#modalLongitud').text(data.longitud);
                         $('#modalSuperficie').text(data.superficie);
+                        $('#modalUso').text(data.uso);
                         $('#modalPropietario').text(data.propietarioNombre);
 
-
                         $('#inmuebleModal').modal('show');
-                        console.log(response);
-                        console.log(data)
                     } else {
                         alert(response.message);
                     }

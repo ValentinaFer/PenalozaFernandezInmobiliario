@@ -20,8 +20,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
             rp = new RepositorioPropietario();
             ti = new RepositorioTipoInmueble();
         }
-
-        public IActionResult Index(int pageNumber)
+        public IActionResult Index(string estado, int pageNumber = 1)
         {
             try
             {
@@ -31,35 +30,42 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 }
 
                 // Obtener la lista de inmuebles
-                var listaInmuebles = ri.GetAllForIndex(10, pageNumber);
-                if (listaInmuebles.Count == 0)
+                var listaInmuebles = ri.GetAllForIndex(10, pageNumber).AsQueryable();
+
+                // Filtrar por estado si se proporciona
+                if (!string.IsNullOrWhiteSpace(estado))
                 {
-                    listaInmuebles = ri.GetAllForIndex(10, pageNumber - 1);
-                    pageNumber = pageNumber - 1;
+                    listaInmuebles = listaInmuebles.Where(i => i.Estado == estado);
                 }
 
 
 
+                // Convertir a lista y ajustar el paginado
+                var inmueblesPaginados = listaInmuebles.Skip((pageNumber - 1) * 10).Take(10).ToList();
 
-
+                // Ajustar el paginado en caso de que no haya inmuebles en la página actual
+                if (inmueblesPaginados.Count == 0 && pageNumber > 1)
+                {
+                    pageNumber--;
+                    inmueblesPaginados = listaInmuebles.Skip((pageNumber - 1) * 10).Take(10).ToList();
+                }
 
                 IndexInmuebleViewModel vm = new()
                 {
-                    Inmuebles = listaInmuebles,
-                    PageNumber = pageNumber
+                    Inmuebles = inmueblesPaginados,
+                    PageNumber = pageNumber,
+                    Estado = estado,  // Pasar el estado actual al ViewModel
+
                 };
 
-                if (listaInmuebles.Count == 0)
+                if (inmueblesPaginados.Count == 0)
                 {
                     vm.Error = "No hay Inmuebles disponibles.";
                 }
 
-                vm.ToastMessage = "";
-                if (TempData.ContainsKey("ToastMessage"))
-                {
-                    vm.ToastMessage = TempData["ToastMessage"] as string;
-                }
+                vm.ToastMessage = TempData.ContainsKey("ToastMessage") ? TempData["ToastMessage"] as string : "";
                 TempData.Remove("ToastMessage");
+
                 _logger.LogInformation("index method:" + vm.ToastMessage);
                 return View(vm);
             }
@@ -69,6 +75,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
         }
+
 
 
 
@@ -282,9 +289,10 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 {
                     Direccion = inmueble.Direccion,
                     Ambientes = inmueble.Ambientes,
-                    Latitud = inmueble.Latitud.ToString("0.000000"),
-                    Longitud = inmueble.Longitud.ToString("0.000000"),
+                    Latitud = inmueble.Latitud.ToString(""),
+                    Longitud = inmueble.Longitud.ToString(""),
                     Superficie = inmueble.Superficie,
+                    Uso = inmueble.Uso,
                     PropietarioNombre = $"{inmueble.Duenio?.Nombre} {inmueble.Duenio?.Apellido}"
                 };
 
@@ -304,12 +312,6 @@ namespace PenalozaFernandezInmobiliario.Controllers
         }
 
 
-        // public IActionResult MostrarMapa(decimal latitud, decimal longitud)
-        // {
-        //     ViewBag.Latitud = latitud;
-        //     ViewBag.Longitud = longitud;
-        //     return View();
-        // }
     }
 
 

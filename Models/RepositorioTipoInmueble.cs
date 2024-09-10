@@ -13,7 +13,7 @@ namespace PenalozaFernandezInmobiliario.Models
             var tipoInmuebles = new List<TipoInmueble>();
             using (var connection = new MySqlConnection(ConnectionString))
             {
-                var sql = $"SELECT id, tipo FROM tiposinmueble;";
+                var sql = "SELECT id, tipo FROM tiposinmueble;";
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     connection.Open();
@@ -24,7 +24,8 @@ namespace PenalozaFernandezInmobiliario.Models
                             tipoInmuebles.Add(new TipoInmueble
                             {
                                 idTipoInmueble = reader.GetInt32("id"),
-                                tipo = reader.GetString("tipo")
+
+                                tipo = reader.GetString(reader.GetOrdinal(nameof(TipoInmueble.tipo))),
                             });
                         }
                     }
