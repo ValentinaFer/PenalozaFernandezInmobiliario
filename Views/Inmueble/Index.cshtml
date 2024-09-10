@@ -14,19 +14,21 @@
         @Html.Partial("_ToastModal")
     </div>
 
-    <!-- Formulario para filtrar -->
     <form asp-action="Index" method="get" class="mb-4">
         <div class="row">
             <!-- Select para el estado -->
             <div class="col-md-4">
                 <select name="estado" class="form-control">
-
                     <option value="Disponible">Disponible</option>
-                    <option value="No Disponible">No Disponible
-                    </option>
+                    <option value="No Disponible">No Disponible</option>
                 </select>
-            </div <!-- Campo para el ID del propietario -->
+            </div>
 
+            <!-- Campo para el nombre completo del propietario -->
+            <div class="col-md-4">
+                <input type="text" name="propietario" class="form-control"
+                    placeholder="Nombre completo del propietario" />
+            </div>
 
             <!-- Botón para filtrar -->
             <div class="col-md-4">
@@ -34,7 +36,6 @@
             </div>
         </div>
     </form>
-
 
 
     @if (Model.Inmuebles != null && Model.Inmuebles.Any())

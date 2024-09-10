@@ -20,7 +20,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
             rp = new RepositorioPropietario();
             ti = new RepositorioTipoInmueble();
         }
-        public IActionResult Index(string estado, int pageNumber = 1)
+        public IActionResult Index(string estado, string propietario, int pageNumber = 1)
         {
             try
             {
@@ -38,7 +38,12 @@ namespace PenalozaFernandezInmobiliario.Controllers
                     listaInmuebles = listaInmuebles.Where(i => i.Estado == estado);
                 }
 
-
+                // Filtrar por nombre o apellido del propietario si se proporciona
+                if (!string.IsNullOrWhiteSpace(propietario))
+                {
+                    listaInmuebles = listaInmuebles.Where(i =>
+                        (i.Duenio.Nombre + " " + i.Duenio.Apellido).Contains(propietario));
+                }
 
                 // Convertir a lista y ajustar el paginado
                 var inmueblesPaginados = listaInmuebles.Skip((pageNumber - 1) * 10).Take(10).ToList();
@@ -54,8 +59,8 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 {
                     Inmuebles = inmueblesPaginados,
                     PageNumber = pageNumber,
-                    Estado = estado,  // Pasar el estado actual al ViewModel
-
+                    Estado = estado,
+                    Propietario = propietario,
                 };
 
                 if (inmueblesPaginados.Count == 0)

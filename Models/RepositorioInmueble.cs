@@ -20,7 +20,7 @@ public class RepositorioInmueble
             var sql = @$"SELECT i.{nameof(Inmueble.IdInmueble)}, i.{nameof(Inmueble.Direccion)}, 
                         i.{nameof(Inmueble.Ambientes)}, i.{nameof(Inmueble.Superficie)}, 
                         i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.Precio)}, 
-                        i.{nameof(Inmueble.IdPropietario)}, i.{nameof(Inmueble.Estado)},  -- <--- Agregar aquí Estado
+                        i.{nameof(Inmueble.IdPropietario)}, i.{nameof(Inmueble.Estado)},
                         p.{nameof(Propietario.Nombre)} AS NombrePropietario,
                         p.{nameof(Propietario.Apellido)} AS ApellidoPropietario
                     FROM Inmuebles i 
@@ -31,9 +31,9 @@ public class RepositorioInmueble
             using (var command = new MySqlCommand(sql, connection))
             {
                 // Parámetro para el filtro del estado
-                command.Parameters.AddWithValue("@Estado", "Disponible"); // Cambia "Disponible" por el valor deseado
-                                                                          // command.Parameters.AddWithValue("@Estado", "No disponible");
-                                                                          // Parámetros de paginación
+                command.Parameters.AddWithValue("@Estado", "Disponible");
+
+
                 command.Parameters.AddWithValue("@PageSize", pageSize);
                 command.Parameters.AddWithValue("@Offset", (pageNumber - 1) * pageSize);
 
@@ -52,7 +52,7 @@ public class RepositorioInmueble
                             Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
                             Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
                             IdPropietario = reader.GetInt32(nameof(Inmueble.IdPropietario)),
-                            Estado = reader.GetString(nameof(Inmueble.Estado)),  // Ahora puedes obtener Estado
+                            Estado = reader.GetString(nameof(Inmueble.Estado)),
                             Duenio = new Propietario
                             {
                                 IdPropietario = reader.GetInt32("IdPropietario"),
@@ -159,9 +159,9 @@ public class RepositorioInmueble
             }
             catch (Exception ex)
             {
-                // Registrar la excepción o lanzarla nuevamente para manejarla en el controlador
+
                 Console.WriteLine($"Error al actualizar el inmueble: {ex.Message}");
-                throw; // Lanzar la excepción nuevamente para que el controlador pueda manejarla
+                throw;
             }
         }
     }
@@ -254,9 +254,9 @@ public class RepositorioInmueble
             }
             catch (Exception ex)
             {
-                // Manejar la excepción de forma más robusta
+
                 Console.WriteLine($"Error al crear el inmueble: {ex.Message}");
-                // Considerar lanzar la excepción o usar un sistema de logging
+
             }
         }
         return id;
