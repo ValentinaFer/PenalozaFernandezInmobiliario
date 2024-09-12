@@ -12,15 +12,16 @@ public class RepositorioInmueble
 
 
     //trae solo data necesaria para mostrar en index
-    public IList<Inmueble> GetAllForIndex(int pageSize, int pageNumber)
+    public IList<Inmueble> GetAllForIndex(int pageSize, int pageNumber, string estado)
     {
         var inmuebles = new List<Inmueble>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
             var sql = @$"SELECT i.{nameof(Inmueble.IdInmueble)}, i.{nameof(Inmueble.Direccion)}, 
                         i.{nameof(Inmueble.Ambientes)}, i.{nameof(Inmueble.Superficie)}, 
-                        i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, i.{nameof(Inmueble.Precio)}, 
-                        i.{nameof(Inmueble.IdPropietario)}, i.{nameof(Inmueble.Estado)},
+                        i.{nameof(Inmueble.Latitud)}, i.{nameof(Inmueble.Longitud)}, 
+                        i.{nameof(Inmueble.Precio)}, i.{nameof(Inmueble.IdPropietario)}, 
+                        i.{nameof(Inmueble.Estado)},
                         p.{nameof(Propietario.Nombre)} AS NombrePropietario,
                         p.{nameof(Propietario.Apellido)} AS ApellidoPropietario
                     FROM Inmuebles i 
@@ -30,10 +31,8 @@ public class RepositorioInmueble
 
             using (var command = new MySqlCommand(sql, connection))
             {
-                // Parámetro para el filtro del estado
-                command.Parameters.AddWithValue("@Estado", "Disponible");
-
-
+                // Parámetro dinámico para el filtro del estado
+                command.Parameters.AddWithValue("@Estado", estado);
                 command.Parameters.AddWithValue("@PageSize", pageSize);
                 command.Parameters.AddWithValue("@Offset", (pageNumber - 1) * pageSize);
 
@@ -67,6 +66,7 @@ public class RepositorioInmueble
         }
         return inmuebles;
     }
+
 
 
     public int getTotalEntries()
@@ -140,6 +140,7 @@ public class RepositorioInmueble
                          {nameof(Inmueble.Ambientes)} = @Ambientes,
                          {nameof(Inmueble.Latitud)} = @Latitud,
                          {nameof(Inmueble.Longitud)} = @Longitud,
+                         {nameof(Inmueble.Precio)} = @Precio,
                          {nameof(Inmueble.IdPropietario)} = @IdPropietario
                      WHERE {nameof(Inmueble.IdInmueble)} = @IdInmueble;";
             try
@@ -150,6 +151,7 @@ public class RepositorioInmueble
                     command.Parameters.Add("@Ambientes", MySqlDbType.Int32).Value = inmueble.Ambientes;
                     command.Parameters.Add("@Latitud", MySqlDbType.Decimal).Value = inmueble.Latitud;
                     command.Parameters.Add("@Longitud", MySqlDbType.Decimal).Value = inmueble.Longitud;
+                    command.Parameters.Add("@Precio", MySqlDbType.Decimal).Value = inmueble.Precio;
                     command.Parameters.Add("@IdPropietario", MySqlDbType.Int32).Value = inmueble.IdPropietario;
                     command.Parameters.Add("@IdInmueble", MySqlDbType.Int32).Value = inmueble.IdInmueble;
 
@@ -177,10 +179,10 @@ public class RepositorioInmueble
             using (var connection = new MySqlConnection(ConnectionString))
             {
                 var sql = @"SELECT i.IdInmueble, i.Direccion, i.Ambientes, i.Superficie, i.Latitud, i.Longitud,i.Uso, 
-                               i.IdPropietario, p.Nombre AS Nombre, p.Apellido AS Apellido
+                              i.Precio, i.IdPropietario, p.Nombre AS Nombre, p.Apellido AS Apellido
                         FROM Inmuebles i
                         INNER JOIN Propietarios p ON i.IdPropietario = p.IdPropietario
-                        WHERE i.IdInmueble = @IdInmueble AND i.Estado = Disponible;";
+                        WHERE i.IdInmueble = @IdInmueble";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
@@ -199,6 +201,7 @@ public class RepositorioInmueble
                                 Latitud = reader.GetDecimal("Latitud"),
                                 Longitud = reader.GetDecimal("Longitud"),
                                 Uso = reader.GetString("Uso"),
+                                Precio = reader.GetDecimal("Precio"),
                                 IdPropietario = reader.GetInt32("IdPropietario"),
                                 Duenio = new Propietario
                                 {
@@ -213,7 +216,7 @@ public class RepositorioInmueble
         }
         catch (Exception ex)
         {
-            // Manejar la excepción, por ejemplo, registrarla o lanzarla nuevamente
+
             Console.WriteLine($"Error al buscar el inmueble: {ex.Message}");
         }
         return inmueble;
@@ -269,10 +272,13 @@ public class RepositorioInmueble
         int result = -1;
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var sql = @$"UPDATE Inmuebles SET {nameof(Inmueble.Estado)} = 0 WHERE {nameof(Inmueble.IdInmueble)} = @{nameof(Inmueble.IdInmueble)};";
+            var sql = @$"UPDATE Inmuebles 
+                     SET {nameof(Inmueble.Estado)} = 'No disponible'  
+                     WHERE {nameof(Inmueble.IdInmueble)} = @{nameof(Inmueble.IdInmueble)};";
+
             using (var command = new MySqlCommand(sql, connection))
             {
-                command.Parameters.AddWithValue(nameof(Inmueble.IdInmueble), id);
+                command.Parameters.AddWithValue($"@{nameof(Inmueble.IdInmueble)}", id);
                 connection.Open();
                 result = command.ExecuteNonQuery();
                 connection.Close();

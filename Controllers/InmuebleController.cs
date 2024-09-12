@@ -29,14 +29,11 @@ namespace PenalozaFernandezInmobiliario.Controllers
                     pageNumber = 1;
                 }
 
-                // Obtener la lista de inmuebles
-                var listaInmuebles = ri.GetAllForIndex(10, pageNumber).AsQueryable();
+                // Validar el estado; si es nulo o vacío, asumir "Disponible" por defecto
+                estado = string.IsNullOrWhiteSpace(estado) ? "Disponible" : estado;
 
-                // Filtrar por estado si se proporciona
-                if (!string.IsNullOrWhiteSpace(estado))
-                {
-                    listaInmuebles = listaInmuebles.Where(i => i.Estado == estado);
-                }
+                // Obtener la lista de inmuebles con el estado filtrado
+                var listaInmuebles = ri.GetAllForIndex(10, pageNumber, estado).AsQueryable();
 
                 // Filtrar por nombre o apellido del propietario si se proporciona
                 if (!string.IsNullOrWhiteSpace(propietario))
@@ -80,6 +77,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
         }
+
 
 
 
@@ -240,40 +238,32 @@ namespace PenalozaFernandezInmobiliario.Controllers
             try
             {
                 _logger.LogInformation("Delete id: {id}", id);
+
+
                 var result = ri.Delete(id);
+
                 _logger.LogInformation("Update Result: {result}", result);
+
                 if (result > 0)
                 {
-                    TempData["ToastMessage"] = "Inmueble eliminado con exito!";
+                    TempData["ToastMessage"] = "Inmueble eliminado (marcado como No Disponible) con éxito!";
                 }
                 else
                 {
-                    TempData["ToastMessage"] = "No se pudo eliminar el Inmueble..";
+                    TempData["ToastMessage"] = "No se pudo eliminar (cambiar estado del) Inmueble.";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar"); //remember to be more specific here
-                TempData["Error"] = "Se produjo un error al eliminar el Inmueble";
+                _logger.LogError(ex, "Error al intentar cambiar el estado del Inmueble");
+                TempData["Error"] = "Se produjo un error al intentar eliminar el Inmueble.";
             }
-            try
-            {
-                return RedirectToAction("redirectToIndex");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al redirigir a Index de Inmuebles");
-                TempData["Error"] = "Se produjo un error al redirigir a Index de Inmuebles";
-                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
-            }
+
+            return RedirectToAction("Index");
         }
 
 
-        [HttpGet]
-        public IActionResult Eliminar(int id)
-        {
-            return RedirectToAction("DetalleInmueble", new { id = id, eliminateFlag = true });
-        }
+
 
 
 
