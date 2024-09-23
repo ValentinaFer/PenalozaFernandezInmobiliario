@@ -2,6 +2,8 @@ using System;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using PenalozaFernandezInmobiliario.Models;
 
 namespace PenalozaFernandezInmobiliario.Controllers
@@ -10,70 +12,41 @@ namespace PenalozaFernandezInmobiliario.Controllers
     {
         private readonly RepositorioUsuario ru;
         private readonly ILogger<UsuarioController> _logger;
+        private readonly IConfiguration configuration;
 
-        public UsuarioController(ILogger<UsuarioController> logger)
+        public UsuarioController(IConfiguration config, ILogger<UsuarioController> logger)
         {
             _logger = logger;
+            configuration = config;
             ru = new RepositorioUsuario();
-
         }
 
 
-
-        public IActionResult Index(string nombre, int pageNumber = 1)
+        [Authorize(Roles = "Administrador")]
+        public IActionResult Index(int pageNumber = 1, string nombre = "")
         {
             try
             {
-                if (pageNumber <= 0)
-                {
-                    pageNumber = 1;
-                }
+                var lista = ru.GetAllForIndex(10, pageNumber, nombre); // Pasa el parámetro del nombre
 
-                // Obtener la lista de todos los usuarios
-                var listaUsuarios = ru.GetAllForIndex(10, pageNumber).AsQueryable();
-
-                // Filtrar por nombre o apellido si se proporciona
-                if (!string.IsNullOrWhiteSpace(nombre))
-                {
-                    listaUsuarios = listaUsuarios.Where(u =>
-                        (u.Nombre + " " + u.Apellido).Contains(nombre));
-                }
-
-                // Convertir a lista y ajustar el paginado
-                var usuariosPaginados = listaUsuarios.Skip((pageNumber - 1) * 10).Take(10).ToList();
-
-                // Ajustar el paginado en caso de que no haya usuarios en la página actual
-                if (usuariosPaginados.Count == 0 && pageNumber > 1)
-                {
-                    pageNumber--;
-                    usuariosPaginados = listaUsuarios.Skip((pageNumber - 1) * 10).Take(10).ToList();
-                }
-
+                var totalEntries = ru.getTotalEntries(nombre); // Modifica este método para que cuente las entradas filtradas por nombre
                 IndexUsuarioViewModel vm = new()
                 {
-                    Usuarios = usuariosPaginados,
+                    Usuarios = lista,
                     PageNumber = pageNumber,
-                    Nombre = nombre,
+                    TotalEntries = totalEntries,
+                    TotalPages = (int)Math.Ceiling((double)totalEntries / 10),
                 };
-
-                if (usuariosPaginados.Count == 0)
-                {
-                    vm.Error = "No hay Usuarios disponibles.";
-                }
-
-                vm.ToastMessage = TempData.ContainsKey("ToastMessage") ? TempData["ToastMessage"] as string : "";
-                TempData.Remove("ToastMessage");
 
                 _logger.LogInformation("index method:" + vm.ToastMessage);
                 return View(vm);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cargar la lista de Usuarios");
-                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+                _logger.LogError(ex, "Error al cargar la lista de usuarios");
+                return RedirectToAction("Error", new { codigo = 500 });
             }
         }
-
 
 
 
@@ -83,7 +56,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
             try
             {
-                if (id > 0) // Modo de edición
+                if (id > 0)
                 {
                     viewModel.Usuario = ru.GetById(id);
                     if (viewModel.Usuario != null)
@@ -97,7 +70,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                         return RedirectToAction("Index");
                     }
                 }
-                else // Modo de creación
+                else
                 {
                     viewModel.Tittle = "Creando Usuario";
                     viewModel.Usuario = new Usuario();
@@ -118,7 +91,20 @@ namespace PenalozaFernandezInmobiliario.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    // verifica si  el archivo de avatar  se ha cargado
+                    if (!string.IsNullOrEmpty(usuarioViewModel.Usuario.Clave))
+                    {
+                        string salt = configuration["Salt"];
+
+                        string hashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                            password: usuarioViewModel.Usuario.Clave,
+                            salt: System.Text.Encoding.ASCII.GetBytes(salt),
+                            prf: KeyDerivationPrf.HMACSHA1,
+                            iterationCount: 1000,
+                            numBytesRequested: 256 / 8));
+
+                        usuarioViewModel.Usuario.Clave = hashedPassword;
+                    }
+
                     if (usuarioViewModel.AvatarFile != null && usuarioViewModel.AvatarFile.Length > 0)
                     {
                         var fileName = Path.GetFileNameWithoutExtension(usuarioViewModel.AvatarFile.FileName);
@@ -133,7 +119,6 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
                         usuarioViewModel.Usuario.Avatar = "/avatars/" + newFileName;
                     }
-
 
                     if (usuarioViewModel.Usuario.IdUsuario > 0)
                     {
@@ -155,7 +140,6 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 ModelState.AddModelError("", "Ocurrió un error al guardar el usuario.");
             }
 
-            // Si algo falla, retorna la vista original con el modelo
             return View("Upsert", usuarioViewModel);
         }
 
@@ -207,8 +191,33 @@ namespace PenalozaFernandezInmobiliario.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                _logger.LogInformation("Delete id: {id}", id);
 
+                var result = ru.Delete(id);
+
+                _logger.LogInformation("Update Result: {result}", result);
+
+                if (result > 0)
+                {
+                    TempData["ToastMessage"] = "Usuario eliminado con éxito!";
+                }
+                else
+                {
+                    TempData["ToastMessage"] = "No se pudo eliminar el usuario.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al intentar eliminar el usuario");
+                TempData["Error"] = "Se produjo un error al intentar eliminar el usuario.";
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }
-
-

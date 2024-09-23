@@ -37,6 +37,8 @@ public class Usuario
     [NotMapped]
     public string RolNombre => Rol > 0 ? ((enRoles)Rol).ToString() : "";
 
+    public bool Estado { get; set; }
+
     public override string ToString()
     {
         return $"{Apellido}, {Nombre}";

@@ -1,4 +1,6 @@
 ﻿$(document).ready(function () {
+
+
     var fields = {
         name: false,
         last_name: false,
@@ -12,18 +14,17 @@
     };
 
     var messages = {
-        name_empty: "Por favor, ingrese el nombre del inquilino",
-        name_invalid: "Por favor, ingrese un nombre válido",
-        last_name_empty: "Por favor, ingrese el apellido del inquilino",
-        last_name_invalid: "Por favor, ingrese un apellido válido",
-        email_empty: "Por favor, ingrese el corre electrónico del inquilino",
-        email_invalid: "Por favor, ingrese un correo electrónico válido",
-        phone_empty: "Por favor, ingrese el teléfono del inquilino",
-        phone_invalid: "Por favor, ingrese un teléfono válido, solo números", //discussion needed about format
-        dni_empty: "Por favor, ingrese el DNI del inquilino",
-        dni_invalid: "Por favor, ingrese un DNI válido, solo números",
-        address_empty: "Por favor, ingrese la dirección del inquilino",
-        //address_invalid: "Por favor, ingrese una dirección válida", //discussion needed about format
+        name_empty: "Por favor, ingrese el nombre del " + entityName,
+        name_invalid: "Por favor, ingrese un nombre válido",
+        last_name_empty: "Por favor, ingrese el apellido del " + entityName,
+        last_name_invalid: "Por favor, ingrese un apellido válido",
+        email_empty: "Por favor, ingrese el correo electrónico del " + entityName,
+        email_invalid: "Por favor, ingrese un correo electrónico válido",
+        phone_empty: "Por favor, ingrese el teléfono del " + entityName,
+        phone_invalid: "Por favor, ingrese un teléfono válido, solo números",
+        dni_empty: "Por favor, ingrese el DNI del " + entityName,
+        dni_invalid: "Por favor, ingrese un DNI válido, solo números",
+        address_empty: "Por favor, ingrese la dirección del " + entityName,
     };
 
     var form = document.getElementById("myForm");

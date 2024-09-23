@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 using PenalozaFernandezInmobiliario.Models;
 
 namespace PenalozaFernandezInmobiliario.Controllers
@@ -20,6 +21,8 @@ namespace PenalozaFernandezInmobiliario.Controllers
             rp = new RepositorioPropietario();
             ti = new RepositorioTipoInmueble();
         }
+
+        [Authorize(Roles = "Administrador, Empleado")]
         public IActionResult Index(string estado, string propietario, int pageNumber = 1)
         {
             try
@@ -246,11 +249,11 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
                 if (result > 0)
                 {
-                    TempData["ToastMessage"] = "Inmueble eliminado (marcado como No Disponible) con éxito!";
+                    TempData["ToastMessage"] = "Inmueble eliminado  con éxito!";
                 }
                 else
                 {
-                    TempData["ToastMessage"] = "No se pudo eliminar (cambiar estado del) Inmueble.";
+                    TempData["ToastMessage"] = "No se pudo eliminar  Inmueble.";
                 }
             }
             catch (Exception ex)

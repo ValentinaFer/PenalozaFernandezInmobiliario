@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 using PenalozaFernandezInmobiliario.Models;
 
 namespace PenalozaFernandezInmobiliario.Controllers;
@@ -16,6 +18,8 @@ public class ContratoController : Controller
         rp = new RepositorioContrato();
     }
 
+
+    [Authorize(Roles = "Administrador, Empleado")]
     public IActionResult Index(IList<Contrato> lista, int pageNumber = 1)
     {
         try
@@ -27,7 +31,7 @@ public class ContratoController : Controller
                 vm.Contratos = lista;
                 return View(vm);
             }
-            
+
             return View(vm);
         }
         catch (Exception ex)
@@ -37,17 +41,19 @@ public class ContratoController : Controller
         }
     }
 
-    public IActionResult Error(int codigo){ 
+    public IActionResult Error(int codigo)
+    {
         var res = HttpContext.Features.Get<IStatusCodeReExecuteFeature>();
         var RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-        var ErrorViewModel = new ErrorViewModel{
+        var ErrorViewModel = new ErrorViewModel
+        {
             RequestId = RequestId,
         };
         switch (codigo)
         {
             case 404:
                 ViewBag.ErrorMessage = "Sorry, the resource you requested could not be found";
-                
+
                 break;
             case 500:
                 ViewBag.ErrorMessage = "Sorry, something went wrong on the server";

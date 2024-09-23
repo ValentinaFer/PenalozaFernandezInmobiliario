@@ -17,8 +17,9 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home"
-                    asp-action="Index">PenalozaFernandezInmobiliario</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    PenalozaFernandezInmobiliario
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -26,34 +27,74 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"><i
-                                    class="bi bi-house-fill text-primary p-2"></i>Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-fill text-primary p-2"></i>Home
+                            </a>
                         </li>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Inquilino" asp-action="Index">
+                                    <i class="bi bi-person-heart text-primary p-2"></i>Inquilinos
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Propietario" asp-action="Index">
+                                    <i class="bi bi-person-heart text-primary p-2"></i>Propietarios
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Inmueble" asp-action="Index">
+                                    <i class="bi bi-houses-fill text-primary p-2"></i>Inmuebles
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Contrato" asp-action="Index">
+                                    <i class="bi bi-clipboard2-fill text-primary p-2"></i>Contratos
+                                </a>
+                            </li>
+
+                               @if (User.IsInRole("Administrador"))
+                    {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Inquilino" asp-action="Index"><i
-                                    class="bi bi-person-heart text-primary p-2"></i>Inquilinos</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Usuario" asp-action="Index">
+                                <i class="bi bi-clipboard2-fill text-primary p-2"></i>Usuarios
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Propietario" asp-action="Index"><i
-                                    class="bi bi-person-heart text-primary p-2"></i>Propietarios</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Inmueble" asp-action="Index"><i
-                                    class="bi bi-houses-fill text-primary p-2"></i>Inmuebles</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Contrato" asp-action="Index"><i
-                                    class="bi bi-clipboard2-fill text-primary p-2"></i>Contratos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Usuario" asp-action="Index"><i
-                                    class="bi bi-clipboard2-fill text-primary p-2"></i>Usuarios</a>
-                        </li>
+                    }
+                        
+                        }
+                    </ul>
+             
+
+                    <ul class="navbar-nav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post"
+                                    style="display:inline;">
+                                    <button type="submit" class="nav-link btn-custom">
+                                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión (@User.Identity.Name)
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link btn-custom" asp-area="" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()

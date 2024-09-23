@@ -1,49 +1,51 @@
 ﻿@model UpsertPropietarioViewModel;
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Propietarios";
     int id = Model.Propietario == null ? 0 : Model.Propietario.IdPropietario;
 }
 
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-4 bg-white rounded p-6">
-            <h1 class="display-4">Propietarios</h1>
-            <h4>@Model.Tittle</h4>
-            <form asp-action="Guardar" method="post">
+<div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
+    <div class="col">
+        <h1 class="display-4">Propietarios</h1>
+        <h4>@Model.Tittle</h4>
+    </div>
+
+    <div class="col-md-12 col-lg-6">
+        <div class="col-lg-8">
+            <form asp-action="Guardar" method="post" class="text-start" id="myForm">
                 <div asp-validation-summary="ModelOnly"></div>
                 <div class="form-group">
-
-                    <input type="hidden" asp-for=Propietario.IdPropietario class="form-control" readonly>
+                    <input type="hidden" asp-for="Propietario.IdPropietario" class="form-control" readonly>
                 </div>
                 <div class="form-group">
                     <label asp-for="Propietario.Nombre" class="control-label"></label>
-                    <input asp-for="Propietario.Nombre" class="form-control">
-                    <span asp-validation-for="Propietario.Nombre" class="text-danger"></span>
+                    <input asp-for="Propietario.Nombre" class="form-control" id="name">
+                    <ul id="name-feedback"></ul>
                 </div>
                 <div class="form-group">
                     <label asp-for="Propietario.Apellido" class="control-label"></label>
-                    <input asp-for="Propietario.Apellido" class="form-control">
-                    <span asp-validation-for="Propietario.Apellido" class="text-danger"></span>
+                    <input asp-for="Propietario.Apellido" class="form-control" id="last-name">
+                    <ul id="last-name-feedback"></ul>
                 </div>
                 <div class="form-group">
                     <label asp-for="Propietario.Email" class="control-label"></label>
-                    <input asp-for="Propietario.Email" class="form-control">
-                    <span asp-validation-for="Propietario.Email" class="text-danger"></span>
+                    <input asp-for="Propietario.Email" class="form-control" id="email" placeholder="name@example.com">
+                    <ul id="email-feedback"></ul>
                 </div>
                 <div class="form-group">
                     <label asp-for="Propietario.Dni" class="control-label"></label>
-                    <input asp-for="Propietario.Dni" class="form-control">
-                    <span asp-validation-for="Propietario.Dni" class="text-danger"></span>
+                    <input asp-for="Propietario.Dni" class="form-control" id="dni">
+                    <ul id="dni-feedback"></ul>
                 </div>
                 <div class="form-group">
                     <label asp-for="Propietario.Telefono" class="control-label"></label>
-                    <input asp-for="Propietario.Telefono" class="form-control">
-                    <span asp-validation-for="Propietario.Telefono" class="text-danger"></span>
+                    <input asp-for="Propietario.Telefono" class="form-control" id="phone">
+                    <ul id="phone-feedback"></ul>
                 </div>
                 <div class="form-group">
                     <label asp-for="Propietario.Domicilio" class="control-label"></label>
-                    <input asp-for="Propietario.Domicilio" class="form-control">
-                    <span asp-validation-for="Propietario.Domicilio" class="text-danger"></span>
+                    <input asp-for="Propietario.Domicilio" class="form-control" id="address">
+                    <ul id="address-feedback"></ul>
                 </div>
                 <div class="form-group">
                     <input type="submit" value="Guardar" class="btn btn-primary m-2">
@@ -54,6 +56,11 @@
 </div>
 
 @section Scripts {
+    <script>
+        var entityName = "@Model.EntityName"; 
+    </script>
+    <script src="~/js/validationFun.js"></script>
+    <script src="~/js/formValidation.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

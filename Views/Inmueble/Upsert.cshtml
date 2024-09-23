@@ -1,49 +1,58 @@
 ﻿@model UpsertInmuebleViewModel
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inmuebles";
     int id = Model.Inmueble == null ? 0 : Model.Inmueble.IdInmueble;
 }
 
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-4 bg-white rounded p-6">
-            <h1 class="display-4">Inmuebles</h1>
-            <h4>@Model.Tittle</h4>
-            <form asp-action="Guardar" method="post">
+<div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
+    <div class="col">
+        <h1 class="display-4">Inmuebles</h1>
+        <h4>@Model.Tittle</h4>
+    </div>
+
+    <div class="col-md-12 col-lg-6">
+        <div class="col-lg-8">
+            <form asp-action="Guardar" method="post" class="text-start" id="myForm">
                 <div asp-validation-summary="ModelOnly"></div>
+
                 <div class="form-group">
                     <input type="hidden" asp-for="Inmueble.IdInmueble" class="form-control" readonly>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="Inmueble.Direccion" class="control-label"></label>
-                    <input asp-for="Inmueble.Direccion" class="form-control">
+                    <input asp-for="Inmueble.Direccion" class="form-control" id="direccion">
                     <span asp-validation-for="Inmueble.Direccion" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="Inmueble.Ambientes" class="control-label"></label>
-                    <input asp-for="Inmueble.Ambientes" class="form-control">
+                    <input asp-for="Inmueble.Ambientes" class="form-control" id="ambientes">
                     <span asp-validation-for="Inmueble.Ambientes" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="Inmueble.Latitud" class="control-label"></label>
-                    <input asp-for="Inmueble.Latitud" class="form-control" type="number" step="any">
+                    <input asp-for="Inmueble.Latitud" class="form-control" id="latitud" type="number" step="any">
                     <span asp-validation-for="Inmueble.Latitud" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="Inmueble.Longitud" class="control-label"></label>
-                    <input asp-for="Inmueble.Longitud" class="form-control" type="number" step="any">
+                    <input asp-for="Inmueble.Longitud" class="form-control" id="longitud" type="number" step="any">
                     <span asp-validation-for="Inmueble.Longitud" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="Inmueble.Superficie" class="control-label"></label>
-                    <input asp-for="Inmueble.Superficie" class="form-control">
+                    <input asp-for="Inmueble.Superficie" class="form-control" id="superficie">
                     <span asp-validation-for="Inmueble.Superficie" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="Inmueble.Precio" class="control-label"></label>
-                    <input asp-for="Inmueble.Precio" class="form-control">
+                    <input asp-for="Inmueble.Precio" class="form-control" id="precio">
                     <span asp-validation-for="Inmueble.Precio" class="text-danger"></span>
                 </div>
 
@@ -53,31 +62,31 @@
                         <option value="Comercial">Comercial</option>
                         <option value="Residencial">Residencial</option>
                     </select>
-
                     <span asp-validation-for="Inmueble.Uso" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="Inmueble.IdTipoInmueble" class="control-label">Tipo de inmueble</label>
                     <select asp-for="Inmueble.IdTipoInmueble" class="form-select" name="inmueble.IdTipoInmueble">
                         @foreach (var item in ViewBag.TipoInmuebles)
                         {
-                            <option selected value="  @item.idTipoInmueble">@item.tipo </option>
+                            <option value="@item.idTipoInmueble">@item.tipo</option>
                         }
                     </select>
                     <span asp-validation-for="Inmueble.IdTipoInmueble" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="Inmueble.IdPropietario" class="control-label">Nombre del propietario</label>
                     <select asp-for="Inmueble.IdPropietario" class="form-select" name="inmueble.IdPropietario">
                         @foreach (var item in ViewBag.Propietarios)
                         {
-
-                            <option selected value="  @item.IdPropietario">@item.Nombre @item.Apellido</option>
-
+                            <option value="@item.IdPropietario">@item.Nombre @item.Apellido</option>
                         }
                     </select>
                     <span asp-validation-for="Inmueble.IdPropietario" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <input type="submit" value="Guardar" class="btn btn-primary m-2">
                 </div>
@@ -87,6 +96,8 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/validationFun.js"></script>
+    <script src="~/js/formValidation.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

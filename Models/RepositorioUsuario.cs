@@ -2,6 +2,11 @@ using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
 using MySql.Data.MySqlClient;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+
+
+
+
 namespace PenalozaFernandezInmobiliario.Models;
 
 public class RepositorioUsuario
@@ -9,21 +14,37 @@ public class RepositorioUsuario
     readonly string ConnectionString = "Server=localhost;Database=inmovalepablo;User=root;Password=;";
 
 
-    public IList<Usuario> GetAllForIndex(int pageSize, int pageNumber)
+
+
+
+
+    public IList<Usuario> GetAllForIndex(int pageSize, int pageNumber, string nombre)
     {
         var usuarios = new List<Usuario>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
             var sql = @$"SELECT u.{nameof(Usuario.IdUsuario)}, u.{nameof(Usuario.Nombre)}, 
-                    u.{nameof(Usuario.Apellido)}, u.{nameof(Usuario.Email)}, 
-                    u.{nameof(Usuario.Avatar)}, u.{nameof(Usuario.Rol)}
-                FROM Usuarios u
-                LIMIT @PageSize OFFSET @Offset";
+                        u.{nameof(Usuario.Apellido)}, u.{nameof(Usuario.Email)}, 
+                        u.{nameof(Usuario.Avatar)}, u.{nameof(Usuario.Rol)}
+                    FROM Usuarios u
+                    WHERE u.{nameof(Usuario.Estado)} = 1";
+
+            if (!string.IsNullOrEmpty(nombre))
+            {
+                sql += " AND (u.Nombre LIKE @Nombre OR u.Apellido LIKE @Nombre)";
+            }
+
+            sql += " LIMIT @PageSize OFFSET @Offset";
 
             using (var command = new MySqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue("@PageSize", pageSize);
                 command.Parameters.AddWithValue("@Offset", (pageNumber - 1) * pageSize);
+
+                if (!string.IsNullOrEmpty(nombre))
+                {
+                    command.Parameters.AddWithValue("@Nombre", $"%{nombre}%");
+                }
 
                 connection.Open();
                 using (var reader = command.ExecuteReader())
@@ -45,6 +66,32 @@ public class RepositorioUsuario
             }
         }
         return usuarios;
+    }
+
+    public int getTotalEntries(string nombre = "")
+    {
+        var result = 0;
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = "SELECT COUNT(*) FROM usuarios WHERE Estado = 1";
+
+            if (!string.IsNullOrEmpty(nombre))
+            {
+                sql += " AND (Nombre LIKE @Nombre OR Apellido LIKE @Nombre)";
+            }
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                if (!string.IsNullOrEmpty(nombre))
+                {
+                    command.Parameters.AddWithValue("@Nombre", $"%{nombre}%");
+                }
+
+                connection.Open();
+                result = Convert.ToInt32(command.ExecuteScalar());
+            }
+        }
+        return result;
     }
 
 
@@ -158,6 +205,64 @@ public class RepositorioUsuario
         catch (Exception ex)
         {
             Console.WriteLine($"Error al buscar el usuario: {ex.Message}");
+        }
+        return usuario;
+    }
+
+
+    public int Delete(int id)
+    {
+        int result = -1;
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"UPDATE usuarios 
+                     SET {nameof(Usuario.Estado)} = 0  
+                     WHERE {nameof(Usuario.IdUsuario)} = @{nameof(Usuario.IdUsuario)};";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue($"@{nameof(Usuario.IdUsuario)}", id);
+                connection.Open();
+                result = command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+        return result;
+    }
+
+
+
+    public Usuario ObtenerUsuarioPorEmail(string email)
+    {
+        Usuario usuario = null;
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @"SELECT IdUsuario, Nombre, Apellido, Email, Clave,  Avatar, Rol 
+                    FROM Usuarios 
+                    WHERE Email = @Email AND Estado = 1"; // Considera el estado del usuario
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@Email", email);
+                connection.Open();
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        usuario = new Usuario
+                        {
+                            IdUsuario = reader.GetInt32("IdUsuario"),
+                            Nombre = reader.GetString("Nombre"),
+                            Apellido = reader.GetString("Apellido"),
+                            Email = reader.GetString("Email"),
+                            Clave = reader.GetString("Clave"),
+
+                            Avatar = reader.IsDBNull(reader.GetOrdinal("Avatar")) ? null : reader.GetString("Avatar"),
+                            Rol = reader.GetInt32("Rol")
+                        };
+                    }
+                }
+            }
         }
         return usuario;
     }

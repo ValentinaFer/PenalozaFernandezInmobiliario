@@ -1,16 +1,19 @@
-@model UpsertUsuarioViewModel;
+@model UpsertUsuarioViewModel
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Usuarios";
     int id = Model.Usuario == null ? 0 : Model.Usuario.IdUsuario;
 }
 
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-4 bg-white rounded p-6">
-            <h1 class="display-4">Usuarios</h1>
-            <h4>@Model.Tittle</h4>
-            <form asp-action="Guardar" method="post" enctype="multipart/form-data">
+<div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
+    <div class="col">
+        <h1 class="display-4">Usuarios</h1>
+        <h4>@Model.Tittle</h4>
+    </div>
+
+    <div class="col-md-12 col-lg-6">
+        <div class="col-lg-8">
+            <form asp-action="Guardar" method="post" enctype="multipart/form-data" class="text-start" id="usuarioForm">
                 <div asp-validation-summary="ModelOnly"></div>
 
                 <div class="form-group">
@@ -19,25 +22,25 @@
 
                 <div class="form-group">
                     <label asp-for="Usuario.Nombre" class="control-label"></label>
-                    <input asp-for="Usuario.Nombre" class="form-control">
+                    <input asp-for="Usuario.Nombre" class="form-control" id="nombre">
                     <span asp-validation-for="Usuario.Nombre" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="Usuario.Apellido" class="control-label"></label>
-                    <input asp-for="Usuario.Apellido" class="form-control">
+                    <input asp-for="Usuario.Apellido" class="form-control" id="apellido">
                     <span asp-validation-for="Usuario.Apellido" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="Usuario.Email" class="control-label"></label>
-                    <input asp-for="Usuario.Email" class="form-control">
+                    <input asp-for="Usuario.Email" class="form-control" id="email">
                     <span asp-validation-for="Usuario.Email" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="Usuario.Clave" class="control-label"></label>
-                    <input asp-for="Usuario.Clave" class="form-control" type="password">
+                    <input asp-for="Usuario.Clave" class="form-control" type="password" id="clave">
                     <span asp-validation-for="Usuario.Clave" class="text-danger"></span>
                 </div>
 
@@ -48,35 +51,31 @@
 
                     @if (!string.IsNullOrEmpty(Model.Usuario?.Avatar))
                     {
-                        <img src="@Model.Usuario.Avatar" alt="Avatar" style="width: 100px; height: 100px;" />
+                        <img src="@Model.Usuario.Avatar" alt="Avatar" style="width: 100px; height: 100px;" class="mt-2" />
                     }
                 </div>
-
-
 
                 <div class="form-group">
                     <label asp-for="Usuario.Rol" class="control-label"></label>
                     <select asp-for="Usuario.Rol" class="form-select">
                         <option value="1">Administrador</option>
                         <option value="2">Empleado</option>
-
                     </select>
                     <span asp-validation-for="Usuario.Rol" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <input type="submit" value="Guardar" class="btn btn-primary m-2">
-
-
-
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
 @section Scripts {
+    <script src="~/js/validationFun.js"></script>
+    <script src="~/js/formValidation.js"></script>
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

@@ -2,7 +2,7 @@ using PenalozaFernandezInmobiliario.Models;
 
 public class IndexUsuarioViewModel
 {
-    public List<Usuario> Usuarios { get; set; }
+    public IEnumerable<Usuario>? Usuarios { get; set; }
     public int PageNumber { get; set; }
 
     public string? ToastMessage { get; set; }
@@ -13,5 +13,7 @@ public class IndexUsuarioViewModel
     public string? Rol { get; set; }
 
     public string? Nombre { get; set; }
+    public int TotalEntries { get; set; }
+
 
 }

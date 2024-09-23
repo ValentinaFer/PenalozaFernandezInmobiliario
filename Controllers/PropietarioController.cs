@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 using PenalozaFernandezInmobiliario.Models;
 
 namespace PenalozaFernandezInmobiliario.Controllers
@@ -17,8 +18,11 @@ namespace PenalozaFernandezInmobiliario.Controllers
             rp = new RepositorioPropietario();
         }
 
+
+        [Authorize(Roles = "Administrador, Empleado")]
         public IActionResult Index(int pageNumber)
         {
+
             try
             {
                 if (pageNumber <= 0)
