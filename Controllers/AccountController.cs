@@ -64,7 +64,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
 
-                        TempData["ToastMessage"] = "Inicio de sesión exitoso";
+                        TempData["ToastMessage"] = "Inicio de sesion exitoso";
                         return RedirectToAction("Index", "Home");
                     }
                     else

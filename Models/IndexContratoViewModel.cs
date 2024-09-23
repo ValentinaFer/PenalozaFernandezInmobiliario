@@ -14,6 +14,7 @@ public class IndexContratoViewModel
     public int TotalPages { get; set; }
 
     public int TotalEntries { get; set; }
+    public bool EsEmpleado { get; set; }
 
 }
 

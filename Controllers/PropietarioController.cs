@@ -37,6 +37,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 }
                 IndexPropietarioViewModel vm = new()
                 {
+                    EsEmpleado = User.IsInRole("Empleado"),
                     Propietarios = lista,
                     PageNumber = pageNumber
                 };
@@ -91,7 +92,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
         }
 
-        //GIRL(me to me), don't forget to try catch the exception with the rest of the code
+
         [HttpPost]
         public IActionResult Guardar(UpsertPropietarioViewModel PropietarioViewModel)
         {
@@ -193,6 +194,8 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
         }
 
+
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         public IActionResult Delete(int id)
         {
@@ -227,15 +230,14 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
         }
 
-        //the call from the button to delete
+        [Authorize(Roles = "Administrador")]
         [HttpGet]
         public IActionResult Eliminar(int id)
         {
             return RedirectToAction("DetallePropietario", new { id = id, eliminateFlag = true });
         }
 
-        //Shows the view with the data of the selected Propietario
-        //if there's a flag in the viewdata, it means that it's a redirect from the button to delete, thus it the flag to show a form to confirm deletion
+
         [HttpGet]
         public IActionResult DetallePropietario(int id, bool eliminateFlag = false)
         {

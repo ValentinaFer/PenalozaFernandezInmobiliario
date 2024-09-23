@@ -57,6 +57,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
                 IndexInmuebleViewModel vm = new()
                 {
+                    EsEmpleado = User.IsInRole("Empleado"),
                     Inmuebles = inmueblesPaginados,
                     PageNumber = pageNumber,
                     Estado = estado,
@@ -234,7 +235,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); //check this out later
             }
         }
-
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         public IActionResult Delete(int id)
         {

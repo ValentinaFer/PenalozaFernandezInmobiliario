@@ -29,7 +29,9 @@ public class InquilinoController : Controller
             var TotalEntries = rp.getTotalEntries();
             IndexInquilinoViewModel vm = new()
             {
+
                 Inquilinos = lista,
+                EsEmpleado = User.IsInRole("Empleado"),
                 ToastMessage = GetToastMessage(),
                 PageNumber = pageNumber,
                 TotalEntries = TotalEntries,

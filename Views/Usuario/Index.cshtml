@@ -73,10 +73,13 @@
                                         class="btn btn-primary py-1 px-2">
                                         <i class="bi bi-pencil-fill text-light"></i>
                                     </a>
-                                    <a href="javascript:void(0);" onclick="confirmarEliminar(@item.IdUsuario)" title="Eliminar"
-                                        class="btn btn-danger py-1 px-2">
-                                        <i class="bi bi-trash-fill text-light"></i>
-                                    </a>
+                                    @if (!Model.EsEmpleado)
+                                    {
+                                        <a href="javascript:void(0);" onclick="confirmarEliminar(@item.IdUsuario)" title="Eliminar"
+                                            class="btn btn-danger py-1 px-2">
+                                            <i class="bi bi-trash-fill text-light"></i>
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         }

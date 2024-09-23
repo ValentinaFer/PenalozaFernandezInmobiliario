@@ -8,6 +8,7 @@ namespace PenalozaFernandezInmobiliario.Models
         public int PageNumber { get; set; }
         public string ToastMessage { get; set; }
         public string? Error { get; set; }
+        public bool EsEmpleado { get; set; }
     }
 }
 

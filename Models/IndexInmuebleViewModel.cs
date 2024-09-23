@@ -16,5 +16,6 @@ public class IndexInmuebleViewModel
     public string Estado { get; set; }
     public int? PropietarioId { get; set; }
     public string Propietario { get; set; }
+    public bool EsEmpleado { get; set; }
 }
 

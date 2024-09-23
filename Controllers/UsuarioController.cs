@@ -32,6 +32,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 var totalEntries = ru.getTotalEntries(nombre); // Modifica este método para que cuente las entradas filtradas por nombre
                 IndexUsuarioViewModel vm = new()
                 {
+                    EsEmpleado = User.IsInRole("Empleado"),
                     Usuarios = lista,
                     PageNumber = pageNumber,
                     TotalEntries = totalEntries,

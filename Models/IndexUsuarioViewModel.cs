@@ -14,6 +14,7 @@ public class IndexUsuarioViewModel
 
     public string? Nombre { get; set; }
     public int TotalEntries { get; set; }
+    public bool EsEmpleado { get; set; }
 
 
 }

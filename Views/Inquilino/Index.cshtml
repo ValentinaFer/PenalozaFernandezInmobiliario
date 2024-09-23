@@ -8,8 +8,8 @@
 
     <div class="col-12">
         <h1 class="display-4 ">Inquilinos</h1>
-        <partial name="_ToastModal"/>
-        
+        <partial name="_ToastModal" />
+
         <a asp-action="Upsert" class="btn btn-primary text-light hover rounded-pill mb-3 p-3"
             title="Agregar un nuevo Inquilino">
             <p class="d-inline">Agregar nuevo Inquilino</p><i class="bi bi-person-add ps-1"></i>
@@ -43,10 +43,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewData["TablaVacia"] != null && ViewData["TablaVacia"] != ""){
+                    @if (ViewData["TablaVacia"] != null && ViewData["TablaVacia"] != "")
+                    {
                         <text>
                             <tr scope="row">
-                            <td colspan="6" class="text-center">@ViewData["TablaVacia"]</td>
+                                <td colspan="6" class="text-center">@ViewData["TablaVacia"]</td>
                             </tr>
                         </text>
                     }
@@ -54,7 +55,9 @@
                     {
                         <tr>
                             <td class="d-lg-none">
-                            <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#collaps-@item.Id" aria-expanded="false" aria-controls="collapse" title="Ver contenido oculto"><i class="bi bi-caret-down-fill"></i></button>
+                                <button class="btn" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collaps-@item.Id" aria-expanded="false" aria-controls="collapse"
+                                    title="Ver contenido oculto"><i class="bi bi-caret-down-fill"></i></button>
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Nombre)
@@ -72,33 +75,39 @@
                                 @Html.DisplayFor(modelItem => item.Dni)
                             </td>
                             <td class="text-nowrap text-end">
-                                <a asp-action="RenderDetalleInquilino" asp-route-id="@item.Id" title="Ver detalles completos"
-                                    class="btn btn-info py-1 px-2"><i class="bi bi-person-vcard-fill text-light"></i></a>
+                                <a asp-action="RenderDetalleInquilino" asp-route-id="@item.Id"
+                                    title="Ver detalles completos" class="btn btn-info py-1 px-2"><i
+                                        class="bi bi-person-vcard-fill text-light"></i></a>
                                 <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar"
                                     class="btn btn-primary py-1 px-2"><i class="bi bi-pencil-fill text-light"></i></a>
-                                <a asp-action="RenderDetalleInquilino" asp-route-id="@item.Id" asp-route-eliminateFlag="@true" title="Eliminar"
-                                    class="btn btn-danger py-1 px-2"><i class="bi bi-trash-fill text-light"></i></a>
+
+                                @if (!Model.EsEmpleado)
+                                {
+                                    <a asp-action="RenderDetalleInquilino" asp-route-id="@item.Id"
+                                        asp-route-eliminateFlag="@true" title="Eliminar" class="btn btn-danger py-1 px-2"><i
+                                            class="bi bi-trash-fill text-light"></i></a>
+                                }
                             </td>
                         </tr>
                         <tr class="d-lg-none">
                             <td colspan="5" class="p-0">
                                 <div class="collapse d-lg-none" id="collaps-@item.Id">
                                     <p>@Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Telefono) :
-                                    @Html.DisplayFor(modelItem => item.Telefono)</p>
+                                        @Html.DisplayFor(modelItem => item.Telefono)</p>
                                     <p>@Html.DisplayNameFor(model => model.Inquilinos.FirstOrDefault().Email) :
-                                    @Html.DisplayFor(modelItem => item.Email)</p>
+                                        @Html.DisplayFor(modelItem => item.Email)</p>
                                 </div>
                             </td>
                         </tr>
-                        
+
                     }
                 </tbody>
-                
+
             </table>
         </div>
 
         <div class="col">
-            <partial name="_Pagination"/>
+            <partial name="_Pagination" />
         </div>
 
     </div>

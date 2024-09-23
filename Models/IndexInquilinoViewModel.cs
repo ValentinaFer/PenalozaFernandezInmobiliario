@@ -5,6 +5,7 @@ namespace PenalozaFernandezInmobiliario.Models;
 public class IndexInquilinoViewModel
 {
     public IEnumerable<Inquilino>? Inquilinos { get; set; }
+    public bool EsEmpleado { get; set; }
     public int PageNumber { get; set; }
 
     public string? ToastMessage { get; set; }
@@ -14,6 +15,7 @@ public class IndexInquilinoViewModel
     public int TotalPages { get; set; }
 
     public int TotalEntries { get; set; }
+
 
 }
 
