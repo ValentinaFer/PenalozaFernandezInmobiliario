@@ -271,6 +271,70 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
 
 
+        [Authorize(Roles = "Administrador, Empleado")]
+        [HttpPost]
+        public IActionResult AddTipoInmueble([FromBody] AddTipoInmuebleRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.NuevoTipo))
+            {
+                return Json(new { success = false, message = "El tipo de inmueble no puede estar vacío." });
+            }
+
+            try
+            {
+                var result = ti.AddTipoInmueble(request.NuevoTipo);
+
+                if (result > 0)
+                {
+                    return Json(new { success = true, message = "Tipo de inmueble agregado con éxito.", id = result });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "No se pudo agregar el tipo de inmueble." });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al intentar agregar un nuevo tipo de inmueble.");
+                return Json(new { success = false, message = "Se produjo un error al intentar agregar el tipo de inmueble." });
+            }
+        }
+
+        [Authorize(Roles = "Administrador, Empleado")]
+        [HttpPost]
+        public IActionResult DeleteTipoInmueble(int id)
+        {
+            try
+            {
+                _logger.LogInformation("Delete id: {id}", id);
+
+
+                var result = ti.Delete(id);
+
+                _logger.LogInformation("Update Result: {result}", result);
+
+                if (result > 0)
+                {
+                    TempData["ToastMessage"] = "Inmueble eliminado  con éxito!";
+                }
+                else
+                {
+                    TempData["ToastMessage"] = "No se pudo eliminar  Inmueble.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al intentar cambiar el estado del Inmueble");
+                TempData["Error"] = "Se produjo un error al intentar eliminar el Inmueble.";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
+
+
+
         [HttpGet]
         public IActionResult InmuebleDetalles(int id)
         {

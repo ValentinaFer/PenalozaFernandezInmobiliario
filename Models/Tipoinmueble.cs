@@ -8,8 +8,9 @@ namespace PenalozaFernandezInmobiliario.Models
     {
 
 
-        public int idTipoInmueble { get; set; }
-        public string? tipo { get; set; }
+        public int IdTipoInmueble { get; set; }
+        public bool Estado { get; set; }
+        public string? Tipo { get; set; }
     }
 }
 

@@ -65,15 +65,50 @@
                     <span asp-validation-for="Inmueble.Uso" class="text-danger"></span>
                 </div>
 
+
                 <div class="form-group">
                     <label asp-for="Inmueble.IdTipoInmueble" class="control-label">Tipo de inmueble</label>
-                    <select asp-for="Inmueble.IdTipoInmueble" class="form-select" name="inmueble.IdTipoInmueble">
-                        @foreach (var item in ViewBag.TipoInmuebles)
-                        {
-                            <option value="@item.idTipoInmueble">@item.tipo</option>
-                        }
-                    </select>
+                    <div class="d-flex align-items-center">
+                        <select asp-for="Inmueble.IdTipoInmueble" class="form-select me-2" id="tipoInmuebleSelect">
+                            @foreach (var item in ViewBag.TipoInmuebles)
+                            {
+                                <option value="@item.IdTipoInmueble">@item.Tipo</option>
+                            }
+                        </select>
+                        <button type="button" class="btn btn-danger btn-sm" id="removeTipoInmueble">x</button>
+                    </div>
                     <span asp-validation-for="Inmueble.IdTipoInmueble" class="text-danger"></span>
+                </div>
+
+                <!-- Botón para agregar un nuevo tipo de inmueble que abre el modal -->
+                <div class="form-group">
+                    <a href="#" id="addTipoInmueble" class="text-primary" data-bs-toggle="modal"
+                        data-bs-target="#addTipoInmuebleModal">+ Agregar tipo inmueble</a>
+                </div>
+
+                <!-- Modal para agregar tipo de inmueble -->
+                <div class="modal fade" id="addTipoInmuebleModal" tabindex="-1"
+                    aria-labelledby="addTipoInmuebleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addTipoInmuebleModalLabel">Agregar Tipo de Inmueble</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="nuevoTipoInmueble">Nuevo Tipo de Inmueble</label>
+                                    <input type="text" id="nuevoTipoInmueble" class="form-control"
+                                        placeholder="Ingrese el nuevo tipo de inmueble">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="button" class="btn btn-primary" id="saveTipoInmueble">Guardar</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -94,11 +129,94 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
-    <script src="~/js/validationFun.js"></script>
-    <script src="~/js/formValidation.js"></script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+
+
+    <script>
+        document.getElementById('removeTipoInmueble').addEventListener('click', function () {
+            var select = document.getElementById('tipoInmuebleSelect');
+            var selectedOption = select.options[select.selectedIndex];
+            var IdTipoInmueble = selectedOption.value;
+
+            if (selectedOption) {
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "¡No podrás revertir esto!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, eliminarlo'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Hacer la petición al controlador para eliminar
+                        fetch(`/Inmueble/DeleteTipoInmueble/${IdTipoInmueble}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value // Añadir token antifalsificación si es necesario
+                            }
+                        }).then(response => {
+                            if (response.ok) {
+                                select.remove(select.selectedIndex);
+                                Swal.fire(
+                                    'Eliminado',
+                                    'El tipo de inmueble ha sido eliminado.',
+                                    'success'
+                                );
+                            } else {
+                                Swal.fire('Error', 'No se pudo eliminar el tipo de inmueble.', 'error');
+                            }
+                        }).catch(error => {
+                            Swal.fire('Error', 'Hubo un problema al eliminar el tipo de inmueble.', 'error');
+                        });
+                    }
+                });
+            } else {
+                Swal.fire('Error', 'Por favor selecciona un tipo de inmueble para eliminar.', 'error');
+            }
+        });
+
+        document.getElementById('saveTipoInmueble').addEventListener('click', function () {
+            var nuevoTipo = document.getElementById('nuevoTipoInmueble').value;
+            console.log("Nuevo tipo:", nuevoTipo); // Para verificar si el valor está llegando correctamente
+
+            if (nuevoTipo) {
+
+                fetch('/Inmueble/AddTipoInmueble', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nuevoTipo: nuevoTipo })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Agregar la nueva opción al select
+                            var select = document.getElementById('tipoInmuebleSelect');
+                            var option = document.createElement('option');
+                            option.text = nuevoTipo;
+                            option.value = data.id; // Asignar el ID del nuevo tipo de inmueble
+                            select.add(option);
+                            select.value = option.value;
+
+                            // Cerrar el modal
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('addTipoInmuebleModal'));
+                            modal.hide();
+
+                            // Notificación de éxito
+                            Swal.fire('Guardado', 'El nuevo tipo de inmueble ha sido agregado.', 'success');
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Hubo un problema al agregar el tipo de inmueble.', 'error');
+                    });
+            } else {
+                Swal.fire('Error', 'Por favor ingrese un tipo de inmueble.', 'error');
+            }
+        });
+    </script>
 }

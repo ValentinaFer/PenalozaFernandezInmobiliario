@@ -13,7 +13,7 @@ namespace PenalozaFernandezInmobiliario.Models
             var tipoInmuebles = new List<TipoInmueble>();
             using (var connection = new MySqlConnection(ConnectionString))
             {
-                var sql = "SELECT id, tipo FROM tiposinmueble;";
+                var sql = "SELECT id, tipo FROM tiposinmueble WHERE estado = 1;";
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     connection.Open();
@@ -23,9 +23,9 @@ namespace PenalozaFernandezInmobiliario.Models
                         {
                             tipoInmuebles.Add(new TipoInmueble
                             {
-                                idTipoInmueble = reader.GetInt32("id"),
+                                IdTipoInmueble = reader.GetInt32("id"),
 
-                                tipo = reader.GetString(reader.GetOrdinal(nameof(TipoInmueble.tipo))),
+                                Tipo = reader.GetString(reader.GetOrdinal(nameof(TipoInmueble.Tipo))),
                             });
                         }
                     }
@@ -35,5 +35,44 @@ namespace PenalozaFernandezInmobiliario.Models
 
             return tipoInmuebles;
         }
+
+        public int AddTipoInmueble(string tipo)
+        {
+            int result = -1;
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
+                var sql = @"INSERT INTO tiposinmueble (tipo, estado) VALUES (@tipo, 1); SELECT LAST_INSERT_ID();";
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@tipo", tipo);
+                    connection.Open();
+                    result = Convert.ToInt32(command.ExecuteScalar()); // devuelvo el id del nuevo registro
+                    connection.Close();
+                }
+            }
+            return result;
+        }
+
+
+        public int Delete(int id)
+        {
+            int result = -1;
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
+                var sql = @"UPDATE tiposinmueble 
+                    SET estado = 0  
+                    WHERE id = @id;";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    result = command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            return result;
+        }
+
     }
 }
