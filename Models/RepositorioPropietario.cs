@@ -10,16 +10,14 @@ public class RepositorioPropietario
 
     public IList<Propietario> GetAllForIndex(int pageSize, int pageNumber)
     {
-        var Propietarios = new List<Propietario>();
+        var propietarios = new List<Propietario>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
-            var offset = (pageNumber - 1) * pageSize;
-            offset = Math.Max(offset, 0);
             var sql = @$"SELECT {nameof(Propietario.IdPropietario)}, {nameof(Propietario.Nombre)}, {nameof(Propietario.Apellido)},
-                             {nameof(Propietario.Dni)}, {nameof(Propietario.Telefono)}, {nameof(Propietario.Email)} 
-                             FROM Propietarios 
-                             WHERE {nameof(Propietario.Estado)} = 1
-                             LIMIT {pageSize} OFFSET {offset};";
+             {nameof(Propietario.Dni)}, {nameof(Propietario.Telefono)}, {nameof(Propietario.Email)} 
+             FROM propietarios 
+             WHERE {nameof(Propietario.Estado)} = 1
+             LIMIT {pageSize} OFFSET {(pageNumber - 1) * pageSize};";
 
             using (var command = new MySqlCommand(sql, connection))
             {
@@ -28,7 +26,7 @@ public class RepositorioPropietario
                 {
                     while (reader.Read())
                     {
-                        Propietarios.Add(new Propietario
+                        propietarios.Add(new Propietario
                         {
                             IdPropietario = reader.GetInt32(nameof(Propietario.IdPropietario)),
                             Nombre = reader.GetString(nameof(Propietario.Nombre)),
@@ -37,13 +35,28 @@ public class RepositorioPropietario
                             Telefono = reader.GetString(nameof(Propietario.Telefono)),
                             Email = reader.GetString(nameof(Propietario.Email))
                         });
-
                     }
                     connection.Close();
                 }
             }
         }
-        return Propietarios;
+        return propietarios;
+    }
+
+    public int getTotalEntriesPropietarios()
+    {
+        var result = 0;
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = "SELECT COUNT(*) FROM Propietarios WHERE Estado = 1;";
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                connection.Open();
+                result = Convert.ToInt32(command.ExecuteScalar());
+                connection.Close();
+            }
+        }
+        return result;
     }
 
     public int Update(Propietario Propietario)

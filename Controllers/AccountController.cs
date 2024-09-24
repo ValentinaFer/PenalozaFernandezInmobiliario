@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using PenalozaFernandezInmobiliario.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+
 using System.Security.Claims;
 
 namespace PenalozaFernandezInmobiliario.Controllers
@@ -56,7 +57,8 @@ namespace PenalozaFernandezInmobiliario.Controllers
                         var claims = new List<Claim>
                         {
                             new Claim(ClaimTypes.Name, usuario.Email),
-                            new Claim(ClaimTypes.Role, usuario.RolNombre)
+                            new Claim(ClaimTypes.Role, usuario.RolNombre),
+                            new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString())
                         };
 
                         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

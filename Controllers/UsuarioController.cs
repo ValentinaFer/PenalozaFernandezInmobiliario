@@ -3,7 +3,9 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+
 using PenalozaFernandezInmobiliario.Models;
 
 namespace PenalozaFernandezInmobiliario.Controllers
@@ -106,6 +108,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                         usuarioViewModel.Usuario.Clave = hashedPassword;
                     }
 
+                    // Si hay un nuevo archivo de avatar, lo subimos y actualizamos la ruta
                     if (usuarioViewModel.AvatarFile != null && usuarioViewModel.AvatarFile.Length > 0)
                     {
                         var fileName = Path.GetFileNameWithoutExtension(usuarioViewModel.AvatarFile.FileName);
@@ -121,6 +124,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                         usuarioViewModel.Usuario.Avatar = "/avatars/" + newFileName;
                     }
 
+                    // Si no se selecciona un nuevo avatar, se mantiene el valor del avatar actual
                     if (usuarioViewModel.Usuario.IdUsuario > 0)
                     {
                         ru.Update(usuarioViewModel.Usuario);
@@ -220,5 +224,34 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
             return RedirectToAction("Index");
         }
+
+
+
+
+        public IActionResult QuitarAvatar()
+        {
+            var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+
+            if (string.IsNullOrEmpty(claimValue))
+            {
+                // Manejar el caso donde el Claim es nulo o vacío
+                return BadRequest("No se pudo obtener el identificador del usuario.");
+            }
+
+            var userId = int.Parse(claimValue);
+            var usuario = ru.GetById(userId);
+
+            if (usuario != null)
+            {
+                usuario.Avatar = string.Empty;
+                ru.Update(usuario);
+            }
+
+            return RedirectToAction("Index");
+        }
+
     }
+
+
 }

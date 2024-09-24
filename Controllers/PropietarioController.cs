@@ -20,46 +20,30 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
 
         [Authorize(Roles = "Administrador, Empleado")]
-        public IActionResult Index(int pageNumber)
+        public IActionResult Index(int pageNumber = 1)
         {
-
             try
             {
-                if (pageNumber <= 0)
-                {
-                    pageNumber = 1;
-                }
                 var lista = rp.GetAllForIndex(10, pageNumber);
-                if (lista.Count == 0)
-                {
-                    lista = rp.GetAllForIndex(10, pageNumber - 1);
-                    pageNumber = pageNumber - 1;
-                }
+                HandleMessagesTableVacia(lista.Count);
+                var TotalEntries = rp.getTotalEntriesPropietarios();
                 IndexPropietarioViewModel vm = new()
                 {
-                    EsEmpleado = User.IsInRole("Empleado"),
                     Propietarios = lista,
-                    PageNumber = pageNumber
+                    EsEmpleado = User.IsInRole("Empleado"),
+                    ToastMessage = GetToastMessage(),
+                    PageNumber = pageNumber,
+                    TotalEntries = TotalEntries,
+                    TotalPages = (int)Math.Ceiling((double)TotalEntries / 10),
                 };
 
-                if (lista.Count == 0)
-                {
-                    vm.Error = "No hay propietarios disponibles.";
-                }
-
-                vm.ToastMessage = "";
-                if (TempData.ContainsKey("ToastMessage"))
-                {
-                    vm.ToastMessage = TempData["ToastMessage"] as string;
-                }
-                TempData.Remove("ToastMessage");
                 _logger.LogInformation("index method:" + vm.ToastMessage);
                 return View(vm);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cargar la lista de Propietarios");
-                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+                _logger.LogError(ex, "Error al cargar la lista de propietarios");
+                return RedirectToAction("Error", new { codigo = 500 });
             }
         }
 
@@ -91,6 +75,26 @@ namespace PenalozaFernandezInmobiliario.Controllers
             }
 
         }
+        private string GetToastMessage()
+        {
+            if (TempData.ContainsKey("ToastMessage"))
+            {
+                var toastMessage = TempData["ToastMessage"] as string;
+                TempData.Remove("ToastMessage");
+                return toastMessage == null ? "" : toastMessage;
+            }
+            return "";
+        }
+
+        private void HandleMessagesTableVacia(int listaCount)
+        {
+            if (listaCount == 0)
+            {
+                _logger.LogWarning("No hay propietarios para mostrar");
+                ViewData["TablaVacia"] = "No hay propietarios para mostrar";
+            }
+        }
+
 
 
         [HttpPost]

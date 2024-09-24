@@ -32,11 +32,24 @@
                     <span asp-validation-for="Usuario.Apellido" class="text-danger"></span>
                 </div>
 
-                <div class="form-group">
-                    <label asp-for="Usuario.Email" class="control-label"></label>
-                    <input asp-for="Usuario.Email" class="form-control" id="email">
-                    <span asp-validation-for="Usuario.Email" class="text-danger"></span>
-                </div>
+                @* Condicionar la visibilidad del correo y el rol si el usuario NO es "Empleado" *@
+                @if (!User.IsInRole("Empleado"))
+                {
+                    <div class="form-group">
+                        <label asp-for="Usuario.Email" class="control-label"></label>
+                        <input asp-for="Usuario.Email" class="form-control" id="email">
+                        <span asp-validation-for="Usuario.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Usuario.Rol" class="control-label"></label>
+                        <select asp-for="Usuario.Rol" class="form-select">
+                            <option value="1">Administrador</option>
+                            <option value="2">Empleado</option>
+                        </select>
+                        <span asp-validation-for="Usuario.Rol" class="text-danger"></span>
+                    </div>
+                }
 
                 <div class="form-group">
                     <label asp-for="Usuario.Clave" class="control-label"></label>
@@ -51,17 +64,13 @@
 
                     @if (!string.IsNullOrEmpty(Model.Usuario?.Avatar))
                     {
+                        <input type="hidden" asp-for="Usuario.Avatar" />
                         <img src="@Model.Usuario.Avatar" alt="Avatar" style="width: 100px; height: 100px;" class="mt-2" />
+                        <div>
+                            <a href="@Url.Action("QuitarAvatar", "Usuario", new { id = Model.Usuario.IdUsuario })"
+                                class="btn btn-danger mt-2">Quitar Avatar</a>
+                        </div>
                     }
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Usuario.Rol" class="control-label"></label>
-                    <select asp-for="Usuario.Rol" class="form-select">
-                        <option value="1">Administrador</option>
-                        <option value="2">Empleado</option>
-                    </select>
-                    <span asp-validation-for="Usuario.Rol" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
