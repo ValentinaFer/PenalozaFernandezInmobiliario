@@ -16,5 +16,7 @@ public class IndexContratoViewModel
     public int TotalEntries { get; set; }
     public bool EsEmpleado { get; set; }
 
+    public string? Rol { get; set; }
+
 }
 

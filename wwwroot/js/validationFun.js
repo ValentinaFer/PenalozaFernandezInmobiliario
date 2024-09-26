@@ -1,4 +1,29 @@
 ﻿
+function formatPrice( value ) {
+    return formattedImport = new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS'
+    }).format(value);
+}
+
+function initToast(){
+    return Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        iconColor: 'white',
+        customClass: {
+            popup: 'colored-toast'
+        },
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+}
+
 /**
  * Adds and removes the specified classes.
  * @param {HTMLElement} element - element to modify classes for. 

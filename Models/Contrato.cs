@@ -19,8 +19,9 @@ public class Contrato
     [Display(Name = "Fecha estipulada de finalización")]
     public DateTime FechaHasta { get; set; }
     [Display(Name = "Fecha de finalización")]
-    public DateTime FechaFinalizacion { get; set; }
-    public decimal Monto { get; set; } //Monto mensual, no total, el total puede ser calculado en base a la cant de meses
+    public DateTime? FechaFinalizacion { get; set;}
+    [Display(Name = "Precio mensual")]
+    public decimal Monto{ get; set;} //Monto mensual, no total, el total puede ser calculado en base a la cant de meses
 
 
     [Display(Name = "Inquilino")]
@@ -38,7 +39,18 @@ public class Contrato
     public Inmueble? Inmueble { get; set; }
 
 
-    public bool Estado { get; set; }
+    public IList<Pago>? Pagos { get; set;}
+
+    public bool Estado { get; set;}
+
+    public string? GoogleMapLink { get; set;}
+
+    /*public string? CreadoPor { get; set;}
+    public DateTime CreadoEn { get; set;}
+    public string? ModificadoPor { get; set;}
+    public DateTime ModificadoEn { get; set;}*/
+
+//-----------------------------------------------------
 
     public static string GetTableName()
     {
@@ -50,9 +62,9 @@ public class Contrato
         return type.Name;
     }
 
-    public string GetFechaFormateada(DateTime date)
-    {
-        return date.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("es-ES"));
+    public string GetFechaFormateada(DateTime? date){
+        if (!date.HasValue) return "No hay fecha";
+        return date.Value.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("es-ES"));
     }
 
 }

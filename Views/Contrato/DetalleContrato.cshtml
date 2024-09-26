@@ -1,0 +1,81 @@
+﻿@model Contrato;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
+    <h1 class="display-4">Contrato</h1>
+
+    <div class="col-md">
+        <h3>Detalles del Contrato</h3>
+        <div class="col">
+            <h5>Información</h5>
+            <hr>
+            <div class="text-start">
+                <p>@Html.DisplayNameFor(model => model.Id): @Html.DisplayFor(model => model.Id)</p>
+                <p>@Html.DisplayNameFor(model => model.FechaDesde): @Model.GetFechaFormateada(@Model.FechaDesde)</p>
+                <p>@Html.DisplayNameFor(model => model.FechaHasta): @Model.GetFechaFormateada(@Model.FechaHasta)</p>
+                <p>@Html.DisplayNameFor(model => model.FechaFinalizacion): @Model.GetFechaFormateada(@Model.FechaFinalizacion)</p>
+                <p>@Html.DisplayNameFor(model => model.Estado): $@Model.Monto.ToString("N2")/mes.</p>
+            </div>
+        </div>
+
+<!-- Maybe use AJAX instead to fetch the data, e.g.: have an accordion for each section of data, when clicked fetch data and populate accordion item -->
+        <div class="col">
+            <h5>Información de Inmueble alquilado</h5>
+            <hr>
+            <div class="text-start">
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Superficie): @Html.DisplayFor(model => model.Inmueble.Superficie) m<sup>2</sup></p>
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Ambientes): @Html.DisplayFor(model => model.Inmueble.Ambientes)</p>
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Direccion): @Html.DisplayFor(model => model.Inmueble.Direccion)</p>
+            </div>    
+        </div>
+        <div class="col">
+            <h5>Información del Propietario del inmueble</h5>
+            <hr>
+            <div class="text-start">
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Duenio.Nombre): @Html.DisplayFor(model => model.Inmueble.Duenio.Nombre)</p>
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Duenio.Apellido): @Html.DisplayFor(model => model.Inmueble.Duenio.Apellido)</p>
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Duenio.Dni): @Html.DisplayFor(model => model.Inmueble.Duenio.Dni)</p>
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Duenio.Email): @Html.DisplayFor(model => model.Inmueble.Duenio.Email)</p>
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Duenio.Domicilio): @Html.DisplayFor(model => model.Inmueble.Duenio.Domicilio)</p>
+                <p>@Html.DisplayNameFor(model => model.Inmueble.Duenio.Telefono): @Html.DisplayFor(model => model.Inmueble.Duenio.Telefono)</p>
+                
+            </div>    
+        </div>
+        <div class="col">
+            <h5>Información del Inquilino</h5>
+            <hr>
+            <div class="text-start">
+                <p>@Html.DisplayNameFor(model => model.Inquilino.Nombre): @Html.DisplayFor(model => model.Inquilino.Nombre)</p>
+                <p>@Html.DisplayNameFor(model => model.Inquilino.Apellido): @Html.DisplayFor(model => model.Inquilino.Apellido)</p>
+                <p>@Html.DisplayNameFor(model => model.Inquilino.Dni): @Html.DisplayFor(model => model.Inquilino.Dni)</p>
+                <p>@Html.DisplayNameFor(model => model.Inquilino.Email): @Html.DisplayFor(model => model.Inquilino.Email)</p>
+                <p>@Html.DisplayNameFor(model => model.Inquilino.Domicilio): @Html.DisplayFor(model => model.Inquilino.Domicilio)</p>
+                <p>@Html.DisplayNameFor(model => model.Inquilino.Telefono): @Html.DisplayFor(model => model.Inquilino.Telefono)</p>
+            </div>    
+        </div>
+    </div>
+
+    <div class="col">
+        @if (ViewData["EliminandoFlag"] != null && (bool)ViewData["EliminandoFlag"])
+        {
+            <text>
+                <div class="bg-danger-subtle py-3 rounded-3 border border-danger">
+                    <p class="text-danger"><strong>¿Está seguro que desea eliminar este Contrato?</strong></p>
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" name="id" value="@Model.Id">
+                        <input type="submit" class="btn btn-danger" value="Sí, eliminar">
+                        <a asp-action="Index" class="btn btn-primary">No, volver al listado</a>
+                    </form>
+                    
+
+                </div>
+
+            </text>
+        }
+
+    </div>
+
+
+</div>

@@ -95,6 +95,8 @@ public class InquilinoController : Controller
         return "";
     }
 
+    [HttpGet("/Inquilino/Editar/{id}")]
+    [HttpGet("/Inquilino/Crear")]
     public IActionResult Upsert(int id)
     {
         UpsertInquilinoViewModel viewModel = new();
@@ -271,7 +273,8 @@ public class InquilinoController : Controller
 
     //Shows the view with the data of the selected inquilino
     //if there's a flag in the viewdata, it means that it's attempting to delete the Inquilino
-    [HttpGet]
+    [HttpGet("/Inquilino/Eliminar/{id}/{eliminateFlag}")]
+    [HttpGet("/Inquilino/VerMas/{id}")]
     public IActionResult RenderDetalleInquilino(int id, bool eliminateFlag = false)
     {
         try

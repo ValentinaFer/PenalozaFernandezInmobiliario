@@ -1,0 +1,224 @@
+﻿@model UpsertContratoViewModel;
+@{
+    ViewData["Title"] = "Creando nuevo contrato";
+    int id = Model.Contrato == null ? 0 : Model.Contrato.Id;
+    
+    var inquilino = Model.Contrato.Inquilino != null? Model.Contrato.Inquilino: null;
+    
+}
+
+<div class="text-center row fw-light bg-light rounded-4 pt-5 pb-4 px-4 shadow">
+    <div class="col-12">
+        <h1 class="display-4">Contratos</h1>
+        <h2>@Model.Tittle
+        </h2>
+    </div>
+
+    <div class="col mx-auto">
+
+        @if (id > 0 ){
+            if (Model.Contrato != null){
+                //editando
+                <div>
+                    <p>Contrato nro. @id</p>
+                    <p>Propietario: @Model.Contrato.Inmueble.Duenio.ToString()</p>
+                    <p>Inquilino: @Model.Contrato.Inquilino.ToString()</p>
+                    <p>Fecha de inicio: @Model.Contrato.GetFechaFormateada(@Model.Contrato.FechaDesde) - Fecha estipulada finalizacion: @Model.Contrato.GetFechaFormateada(@Model.Contrato.FechaHasta)</p>
+                    <p>Fecha de finalizacion: @Model.Contrato.GetFechaFormateada(@Model.Contrato.FechaFinalizacion)</p>
+                </div>
+            } else {
+                <div>
+                    <p class="text-danger">EL contrato no fue encontrado. Por favor, intentelo de nuevo.</p>
+                </div>
+            }
+            
+        }
+
+        <div class="col-12 text-start" id="step_1">
+            <form method="post" id="form_step_1" novalidate>
+                <div class="mandatory-inquilino">
+                    <h3 class="icon-inquilino">Inquilino</h3>
+                    <h5>Seleccione un inquilino *</h5>
+                </div>
+                <table id="tableInquilinos" class="table table-sm table-light table-hover text-start display"
+                    style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Nombre:</th>
+                            <th>DNI</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="col-auto text-center mt-3">
+                    <button class="steps_btn btn btn-primary p-2" data-action="next" data-step="1"
+                        type="button">Continuar <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+
+        <div class="col-12 text-start d-none" id="step_2">
+            <form method="post" id="form_step_2" novalidate>
+                <h3 class="mandatory-inmueble icon-inmueble">Inmueble</h3>
+                <div class="row form-group">
+                    <div class="col-auto form-group">
+                        <h5>Seleccione las fechas de alquiler</h5>
+                        <div class="input-group mb-2">
+                            <span for="monthFrom" class="input-group-text">Desde</span>
+                            <input type="month" class="form-control" id="monthFrom" name="monthFrom">
+                            <span for="monthTo" class="input-group-text">Hasta</span>
+                            <input type="month" class="form-control" id="monthTo" name="monthTo">
+                            <button id="btn_search_inmueble" type="button" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i>
+                                Buscar
+                            </button>
+                            <button aria-label="Busqueda avanzada por filtros"
+                                class="collapsed btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
+                                <i class="bi bi-funnel"></i>
+                            </button>
+                        </div>
+                        <ul id="dates_feedback" class="mb-0"></ul>
+                        <p class="text-body-secondary form-text py-0 mt-0">(Duración del alquiler: <span
+                                id="duracionAlquiler"> ... </span>)</p>
+                    </div>
+
+                    <div class="accordion" id="accordionFilters">
+                        <div class="accordion-item">
+                            <div id="collapseFilters" class="accordion-collapse collapse"
+                                data-bs-parent="#accordionFilters">
+                                <div class="accordion-body">
+
+                                    <div class="col form-group">
+                                        <div class="row">
+                                            <div class="col-sm-12 col-md-6">
+                                                <select class="form-select mb-3" id="usoInmueble"
+                                                    aria-label="Default select">
+                                                    <option selected>Uso del inmueble</option>
+                                                    <option value="Residencial">Residencial</option>
+                                                    <option value="Comercial">Comercial</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-12 col-md-6">
+                                                <select id="tipoInmueble" class="form-select"
+                                                    aria-label="Default select">
+                                                    <option selected>Tipo de inmueble</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <label class="col-form-label">Ambientes:</label>
+                                        <input type="number" class="form-control">
+                                        <label class="col-form-label">Precio aprox:</label>
+                                        <input type="range" class="form-range">
+                                        <div class="col-auto form-group my-3 text-end">
+                                            <button type="submit" id="cleanFilters"
+                                                class="btn btn-outline-secondary">Limpiar
+                                                filtros</button>
+                                            <button type="submit" id="applyFilters"
+                                                class="btn btn-outline-primary">Aplicar
+                                                filtros</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 my-2">
+                    <h5 class="mandatory-inmueble">Seleccione el inmueble *</h5>
+                    <table id="tableInmuebles" class="table table-light table-hover display" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Tipo:</th>
+                                <th>Dirección</th>
+                                <th>Propietario:</th>
+                                <th>Precio:</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="col-auto text-center mt-3">
+                    <button class="steps_btn btn btn-secondary p-2" data-action="previous" data-step="2"
+                        type="button"><i class="bi bi-arrow-left"></i> Volver
+                    </button>
+                    <button class="steps_btn btn btn-primary p-2" data-action="next" data-step="2"
+                        type="button">Continuar <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-12 text-start d-none" id="step_3">
+            <form action="post">
+                <div id="contrato_sum" class="row">
+                    <h3>Contrato</h3>
+                    <div class="input-group mb-2">
+                        <span for="monthFromReview" class="input-group-text">Desde</span>
+                        <input type="text" class="form-control" id="monthFromReview" name="monthFrom">
+                        <span for="monthToReview" class="input-group-text">Hasta</span>
+                        <input type="text" class="form-control" id="monthToReview" name="monthTo">
+                    </div>
+                    <p class="text-body-secondary form-text py-0 mt-0">(Duración del alquiler: <span
+                            id="duracionAlquilerReview"> ... </span>)</p>
+                </div>
+                <div id="inmueble_sum" class="row">
+                    <h3>Inmueble</h3>
+                </div>
+                <div id="inquilino_sum" class="row">
+                    <h3>Inquilino</h3>
+                </div>
+                <div id="propietario_sum" class="row">
+                    <h3>Propietario</h3>
+                </div>
+                <div class="col-auto text-center mt-3">
+                    <button class="steps_btn btn btn-secondary p-2" data-action="previous" data-step="3"
+                        type="button"><i class="bi bi-arrow-left"></i> Volver
+                    </button>
+                    <button class="steps_btn btn btn-lg btn-success p-2 ps-3 pe-3" data-action="next" data-step="3"
+                        type="button">Crear contrato <i class="bi bi-plus-circle-fill"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/js/validationFun.js"></script>
+    <link href="https://cdn.datatables.net/v/bs5/dt-2.1.5/fh-4.0.1/r-3.0.3/sp-2.3.2/sl-2.0.5/datatables.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet">
+
+    <!-- Plugin CSS for Month Select -->
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/plugins/monthSelect/style.css" rel="stylesheet">
+
+    <script src="https://cdn.datatables.net/v/bs5/dt-2.1.5/fh-4.0.1/r-3.0.3/sp-2.3.2/sl-2.0.5/datatables.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.13.2/dist/sweetalert2.all.min.js"></script>
+
+    <!-- Scripts for flatpickr, Month Select plugin and "es" locale -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/plugins/monthSelect/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/es.js"></script>
+
+    <script src="~/js/dataTablesInit.js"></script>
+    @if (@id > 0){
+        <script>
+            const IdContratoEditando = @id;
+            const idInmuebleEditando = @Model.Contrato.Inmueble.IdInmueble
+        </script>
+        <script src="~/js/contratoUp.js"></script>
+    } else {
+        <script src="~/js/contratoUpsert.js"></script>
+    }
+    
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

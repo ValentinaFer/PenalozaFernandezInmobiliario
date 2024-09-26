@@ -9,6 +9,12 @@ public class RepositorioInquilino
     
     readonly string ConnectionString = "Server=localhost;Database=inmovalepablo;User=root;Password=;";
 
+    private readonly Dictionary<string, string> allowedColumns = new Dictionary<string, string>{
+            {"IdInquilino", $"{nameof(Inquilino.Id)}"},
+            {"Nombre", $"{nameof(Inquilino.Nombre)}"},
+            {"dni", $"{nameof(Inquilino.Dni)}"}
+        };
+
     public RepositorioInquilino(){
 
     }
@@ -188,5 +194,64 @@ public class RepositorioInquilino
         }
         return result;
     }
-        
+
+    public List<Inquilino>? GetAllDataTable(string searchValue, string sortColumn, string sortDirection, int skip, int pageSize)
+    {
+        List<Inquilino>? inquilinos = null;
+        if (allowedColumns.TryGetValue(sortColumn, out string allowedColumn)){
+            sortColumn = allowedColumn;
+        } else {
+            sortColumn = $"{nameof(Inquilino.Apellido)}";
+        }
+
+        if (!sortDirection.ToLower().Equals("asc") && !sortDirection.ToLower().Equals("desc"))
+        {
+            sortDirection = "asc";
+        }
+
+        using (var connection = new MySqlConnection(ConnectionString)){
+            var sql = @$"SELECT 
+            {nameof(Inquilino.Apellido)}, {nameof(Inquilino.Nombre)}, {nameof(Inquilino.Dni)}, {nameof(Inquilino.Id)} 
+            FROM Inquilinos WHERE {nameof(Inquilino.Estado)} = 1
+            AND (CONCAT({nameof(Inquilino.Apellido)}, ' ', {nameof(Inquilino.Nombre)}) LIKE @SearchValue OR Dni LIKE @SearchValue)
+            ORDER BY {sortColumn} {sortDirection}
+            LIMIT @Skip, @PageSize";
+
+            using (var command = new MySqlCommand(sql, connection)){
+                command.Parameters.AddWithValue("@SearchValue", $"%{searchValue}%");
+                command.Parameters.AddWithValue("@Skip", skip);
+                command.Parameters.AddWithValue("@PageSize", pageSize);
+                connection.Open();
+                using (var reader = command.ExecuteReader()){
+                    inquilinos = new List<Inquilino>();
+                    while (reader.Read()){
+                        inquilinos.Add(new Inquilino{
+                            Apellido = reader.GetString(nameof(Inquilino.Apellido)),
+                            Nombre = reader.GetString(nameof(Inquilino.Nombre)),
+                            Dni = reader.GetString(nameof(Inquilino.Dni)),
+                            Id = reader.GetInt32(nameof(Inquilino.Id))
+                        });
+                    }
+                    connection.Close();
+                }
+            }
+        }
+        return inquilinos;
+    }
+
+    public int GetCountGetAllDataTable(string searchValue)
+    {
+        int count = 0;
+        using (var connection = new MySqlConnection(ConnectionString)){
+            var sql = @$"SELECT COUNT(*) FROM Inquilinos WHERE {nameof(Inquilino.Estado)} = 1
+            AND (CONCAT({nameof(Inquilino.Apellido)}, ' ', {nameof(Inquilino.Nombre)}) LIKE @SearchValue OR Dni LIKE @SearchValue)";
+            using (var command = new MySqlCommand(sql, connection)){
+                command.Parameters.AddWithValue("@SearchValue", $"%{searchValue}%");
+                connection.Open();
+                count = Convert.ToInt32(command.ExecuteScalar());
+                connection.Close();
+            }
+        }
+        return count;
+    }
 }

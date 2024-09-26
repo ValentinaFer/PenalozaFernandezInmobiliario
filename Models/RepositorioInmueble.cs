@@ -9,7 +9,14 @@ public class RepositorioInmueble
 
     readonly string ConnectionString = "Server=localhost;Database=inmovalepablo;User=root;Password=;";
 
-
+    //para validar columnas de busqueda en datatables
+    private readonly Dictionary<string, string> allowedColumns = new Dictionary<string, string>{
+            {"IdInmueble", $"i.{nameof(Inmueble.IdInmueble)}"},
+            {"Tipo", $"tipo.{nameof(TipoInmueble.Tipo)}"},
+            {"direccion", $"i.{nameof(Inmueble.Direccion)}"},
+            {"duenio", $"p.{nameof(Propietario.Nombre)}"},
+            {"precio", $"i.{nameof(Inmueble.Precio)}"},
+        };
 
     //trae solo data necesaria para mostrar en index
     public IList<Inmueble> GetAllForIndex(int pageSize, int pageNumber, string estado)
@@ -287,4 +294,231 @@ public class RepositorioInmueble
         return result;
     }
 
+
+
+    public Inmueble? GetAllDetailsById(int id)
+    {
+        Inmueble? inmueble = null;
+        try
+        {
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
+                var sql = @$"SELECT i.*, p.Nombre AS Nombre, p.Apellido AS Apellido, ti.{nameof(TipoInmueble.Tipo)}
+                        FROM Inmuebles i
+                        JOIN Propietarios p ON i.IdPropietario = p.IdPropietario AND p.estado = 1
+                        JOIN TiposInmueble ti ON i.{nameof(Inmueble.IdTipoInmueble)} = ti.id
+                        WHERE i.IdInmueble = @IdInmueble AND i.Estado = 'Disponible';";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@IdInmueble", id);
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                       
+                            if (reader.Read())
+                        {
+                            inmueble = new Inmueble
+                            {
+                                IdInmueble = reader.GetInt32(nameof(Inmueble.IdInmueble)),
+                                Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                                Ambientes = reader.GetInt32(nameof(Inmueble.Ambientes)),
+                                Superficie = reader.GetInt32(nameof(Inmueble.Superficie)),
+                                Latitud = reader.GetDecimal(nameof(Inmueble.Latitud)),
+                                Longitud = reader.GetDecimal(nameof(Inmueble.Longitud)),
+                                Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                                Duenio = new Propietario
+                                {
+                                    IdPropietario = reader.GetInt32(nameof(Inmueble.IdPropietario)),
+                                    Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                                    Apellido = reader.GetString(nameof(Propietario.Apellido))
+                                },
+
+                                Tipo = new TipoInmueble 
+                                {
+                                    Tipo = reader.GetString(nameof(TipoInmueble.Tipo))
+                                }
+                            };
+                        }
+                        connection.Close();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al buscar el inmueble: {ex.Message}");
+            throw;
+        }
+        return inmueble;
+    }
+
+
+    //Para obtener todos los inmuebles disponibles dentro de un rango de fechas
+    public List<Inmueble> GetAllInRange(DateTime startDate, DateTime endDate, string searchValue, string sortColumn, string sortDirection, int skip, int pageSize)
+    {
+        List<Inmueble> inmuebles = new List<Inmueble>();
+
+        if (allowedColumns.TryGetValue(sortColumn, out string allowedColumn)){
+            sortColumn = allowedColumn;
+        } else {
+            sortColumn = $"i.{nameof(Inmueble.IdInmueble)}";
+        }
+
+        if (!sortDirection.ToLower().Equals("asc") && !sortDirection.ToLower().Equals("desc")){
+            sortDirection = "asc";
+        }
+
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"SELECT 
+            i.{nameof(Inmueble.IdInmueble)}, i.{nameof(Inmueble.Precio)}, i.{nameof(Inmueble.Direccion)}, i.{nameof(Inmueble.Ambientes)},
+            tipo.{nameof(TipoInmueble.Tipo)},
+            p.{nameof(Propietario.IdPropietario)}, p.{nameof(Propietario.Nombre)}, p.{nameof(Propietario.Apellido)}
+            
+            FROM inmuebles i
+            LEFT JOIN contratos c
+                ON i.{nameof(Inmueble.IdInmueble)} = c.{nameof(Contrato.InmuebleId)} 
+                AND c.{nameof(Contrato.Estado)} = 1
+                AND NOT (
+                    (IFNULL(c.{nameof(Contrato.FechaFinalizacion)}, c.{nameof(Contrato.FechaHasta)}) < @startDate OR c.{nameof(Contrato.FechaDesde)} > @endDate)
+                    )
+                AND (c.{nameof(Contrato.FechaFinalizacion)} IS NULL OR (c.{nameof(Contrato.FechaFinalizacion)} >= c.{nameof(Contrato.FechaHasta)}))
+            JOIN tiposinmueble tipo
+                ON i.{nameof(Inmueble.IdTipoInmueble)} = tipo.id 
+
+            JOIN propietarios p
+                ON p.{nameof(Propietario.IdPropietario)} = i.{nameof(Inmueble.IdPropietario)} 
+                AND p.{nameof(Propietario.Estado)} = 1
+            WHERE i.{nameof(Inmueble.Estado)} = 'Disponible'
+                AND (i.{nameof(Inmueble.Direccion)} LIKE @searchValue OR CONCAT(p.{nameof(Propietario.Apellido)}, ' ', p.{nameof(Propietario.Nombre)}) LIKE @searchValue)
+            
+            GROUP BY i.{nameof(Inmueble.IdInmueble)}
+            HAVING COUNT(c.{nameof(Contrato.Id)}) = 0
+            ORDER BY {sortColumn} {sortDirection}
+            LIMIT @skip, @pageSize;";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@startDate", startDate);
+                command.Parameters.AddWithValue("@endDate", endDate);
+                command.Parameters.AddWithValue("@searchValue", $"%{searchValue}%");
+                command.Parameters.AddWithValue("@skip", skip);
+                command.Parameters.AddWithValue("@pageSize", pageSize);
+
+                Console.WriteLine(sql);
+                connection.Open();
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        inmuebles.Add(new Inmueble
+                        {
+                            
+                            IdInmueble = reader.GetInt32(nameof(Inmueble.IdInmueble)),
+                            Precio = reader.GetDecimal(nameof(Inmueble.Precio)),
+                            Direccion = reader.GetString(nameof(Inmueble.Direccion)),
+                            Ambientes = reader.GetInt32(nameof(Inmueble.Ambientes)),
+                            Tipo = new TipoInmueble
+                            {
+                                Tipo = reader.GetString(nameof(TipoInmueble.Tipo))
+                            },
+                            Duenio = new Propietario
+                            {
+                                IdPropietario = reader.GetInt32(nameof(Propietario.IdPropietario)),
+                                Nombre = reader.GetString(nameof(Propietario.Nombre)),
+                                Apellido = reader.GetString(nameof(Propietario.Apellido))
+                            }
+                        });
+                    }
+
+                    connection.Close();
+                }
+            }
+
+        }
+
+        return inmuebles;
+    }
+
+    public int GetCountGetAllInRangeFiltered(DateTime startDate, DateTime endDate, string searchValue){
+
+        using (var connection = new MySqlConnection(ConnectionString)){
+            var sql = @$"
+                SELECT COUNT(DISTINCT i.{nameof(Inmueble.IdInmueble)})
+
+                FROM inmuebles i
+                LEFT JOIN contratos c
+                    ON i.{nameof(Inmueble.IdInmueble)} = c.{nameof(Contrato.InmuebleId)} 
+                    AND c.estado = 1
+                    AND NOT (
+                    (IFNULL(c.{nameof(Contrato.FechaFinalizacion)}, c.{nameof(Contrato.FechaHasta)}) < @startDate OR c.{nameof(Contrato.FechaDesde)} > @endDate)
+                    )
+                    AND (c.{nameof(Contrato.FechaFinalizacion)} IS NULL OR (c.{nameof(Contrato.FechaFinalizacion)} >= c.{nameof(Contrato.FechaHasta)}))
+                JOIN tiposinmueble tipo
+                    ON i.{nameof(Inmueble.IdTipoInmueble)} = tipo.id 
+                JOIN propietarios p
+                    ON p.{nameof(Propietario.IdPropietario)} = i.{nameof(Inmueble.IdPropietario)} 
+                
+                WHERE i.{nameof(Inmueble.Estado)} = 'Disponible'
+
+                AND (i.{nameof(Inmueble.Direccion)} LIKE @searchValue OR p.{nameof(Propietario.Nombre)} LIKE @searchValue)
+                GROUP BY i.{nameof(Inmueble.IdInmueble)}
+                HAVING COUNT(c.{nameof(Contrato.Id)}) = 0";
+
+            using (var command = new MySqlCommand(sql, connection)){
+                command.Parameters.AddWithValue("@startDate", startDate);
+                command.Parameters.AddWithValue("@endDate", endDate);
+                command.Parameters.AddWithValue("@searchValue", $"%{searchValue}%");
+                connection.Open();
+                var result = Convert.ToInt32(command.ExecuteScalar());
+                connection.Close();
+                return result;
+            }
+        }
+    }
+
+    public bool CheckDisponibilidad(int inmuebleId, DateTime startDate, DateTime endDate)
+    {
+        var disponible = false;
+        /*SELECT IFNULL(COUNT(contratos.id),0) 
+            FROM `inmuebles`
+            LEFT JOIN contratos ON 
+            contratos.inmuebleId = inmuebles.idInmueble 
+            AND contratos.estado = 1
+			AND (contratos.fechaHasta >= "2025-07-02" AND contratos.fechaDesde <= "2025-07-20") 
+            AND (contratos.FechaFinalizacion IS NULL OR (contratos.FechaFinalizacion >= contratos.FechaHasta)) 
+            WHERE inmuebles.idInmueble = 32 AND inmuebles.estado = 'Disponible';*/
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"SELECT IFNULL(COUNT(contratos.id),0) 
+            FROM `inmuebles`
+            LEFT JOIN contratos ON 
+            contratos.inmuebleId = inmuebles.idInmueble 
+            AND contratos.estado = 1
+            AND (contratos.fechaHasta >= @startDate AND contratos.fechaDesde <= @endDate) 
+            AND (contratos.fechaFinalizacion IS NULL OR (contratos.FechaFinalizacion >= contratos.fechaHasta))
+            WHERE inmuebles.idInmueble = @inmuebleId AND inmuebles.estado = 'Disponible';";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@inmuebleId", inmuebleId);
+                command.Parameters.AddWithValue("@startDate", startDate.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@endDate", endDate.ToString("yyyy-MM-dd"));
+                connection.Open();
+                var result = Convert.ToInt32(command.ExecuteScalar());
+                connection.Close();
+                if (result == 0)
+                {
+                    disponible = true;
+                }
+
+            };
+
+        }
+        return disponible;
+    }
+
+    
 }
+

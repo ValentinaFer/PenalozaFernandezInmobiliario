@@ -4,106 +4,192 @@
 
 }
 
+
 <div class="text-center row fw-light bg-light rounded-4 py-5 px-4 shadow">
 
     <div class="col-12">
         <h1 class="display-4 ">Contratos</h1>
         <partial name="_ToastModal" />
 
-        <a asp-action="Index" asp-controller="Inmueble" class="btn btn-primary text-light hover rounded-pill mb-3 p-3"
+        <a asp-action="Upsert" class="btn btn-primary text-light hover rounded-pill mb-3 p-3"
             title="Agregar un nuevo Contrato">
             <p class="d-inline">Agregar nuevo Contrato</p><i class="bi bi-person-add ps-1"></i>
         </a>
     </div>
+
     <div class="col">
+        <div class="table-responsive-lg">
+            <table class="table table-light text-start ">
+                <thead class="text-secondary">
+                    <tr>
+                        <td class="d-lg-none"></td>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Contratos.FirstOrDefault().Id)
+                        </th>
+                        <th>
+                            Fechas estipuladas
+                        </th>
+                        <th class="d-none d-lg-table-cell">
+                            Fecha finalización
+                        </th>
+                        <th class="d-none d-lg-table-cell">
+                            Precio/mes
+                        </th>
+                        <th class="d-none d-lg-table-cell">
+                            @Html.DisplayNameFor(model => model.Contratos.FirstOrDefault().Inquilino)
+                        </th>
+                        <th class="d-none d-lg-table-cell">
+                            @Html.DisplayNameFor(model => model.Contratos.FirstOrDefault().Inmueble.Duenio)
+                        </th>
+                        <th class="d-none d-lg-table-cell">
+                            @Html.DisplayNameFor(model => model.Contratos.FirstOrDefault().Inmueble)
+                        </th>
+                        <th class="text-end">
+                            Acciones
+                        </th>
 
-    </div>
-    <div class="col-12">
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewData["TablaVacia"] != null && ViewData["TablaVacia"] != "")
+                    {
+                        <text>
+                            <tr scope="row">
+                                <td colspan="6" class="text-center">@ViewData["TablaVacia"]</td>
+                            </tr>
+                        </text>
+                    }
+                    @foreach (var item in Model.Contratos)
+                    {
+                        string rowClass = "";
+                        if (item.FechaFinalizacion >= item.FechaHasta)
+                        {
+                            rowClass = "table-success";
+                        }
+                        else if (item.FechaFinalizacion < item.FechaHasta)
+                        {
+                            rowClass = "table-danger";
+                        }
 
-        <div class="row">
-        @if (Model.Contratos != null){
-            @foreach (var contrato in Model.Contratos){
-                if (contrato.Inmueble != null && /*contrato.Inmueble.Duenio != null &&*/ contrato.Inquilino != null){
+                        <tr class="@rowClass">
+                            <td class="d-lg-none">
+                                <button class="btn btn-sm p-1" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collaps-@item.Id" aria-expanded="false" aria-controls="collapse"
+                                    title="Ver contenido oculto"><i class="bi bi-caret-down-fill"></i></button>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Id)
+                            </td>
+                            <td>
+                                @item.GetFechaFormateada(item.FechaDesde) - @item.GetFechaFormateada(item.FechaHasta)
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                @item.GetFechaFormateada(item.FechaFinalizacion)
 
-                    <div class="col-12 col-sm-6 col-lg-4 p-4 position-relative text-start shadow rounded">
-                        <div>
-                            <!--<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info p-3"><i
-                                    class="bi bi-house-door"></i></span>-->
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                $@item.Monto.ToString("N2")
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                @item.Inquilino.ToString()
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                @item.Inmueble.Duenio.Apellido, @item.Inmueble.Duenio.Nombre, @item.Inmueble.Duenio.Dni
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                <a href="@(item.GoogleMapLink)"><i class="bi bi-geo-alt-fill"></i>@Html.DisplayFor(modelItem
+                                => item.Inmueble.Direccion)</a>
+                            </td>
+                            <td class="text-nowrap text-end">
+                                <a asp-action="RenderDetails" asp-route-id="@item.Id" title="Ver detalles completos"
+                                    class="btn btn-sm btn-info py-1 px-2"><i class="bi bi-eye-fill text-light"></i></a>
+                                <a asp-action="Upsert" asp-route-id="@item.Id" title="Renovar contrato"
+                                    class="btn btn-sm btn-primary py-1 px-2"><i
+                                        class="bi bi-pencil-fill text-light"></i></a>
+                                <a data-id="@item.Id" title="Pagar" class="btn btn-sm btn-success py-1 px-2 btn_pagar"><i
+                                        class="bi bi-credit-card-fill"></i></a>
+                                @if (item.Estado)
+                                {
+                                    <a data-id="@item.Id" title="Cancelar"
+                                        class="btn btn-sm btn-danger py-1 px-2 btn_cancelar"><i
+                                            class="bi bi-calendar-x-fill"></i></a>
+                                }
+                                else
+                                {
+                                    <a data-id="@item.Id" title="Activar" class="btn btn-sm btn-info py-1 px-2 btn_activar"><i
+                                            class="bi bi-calendar-x-fill"></i></a>
+                                }
+                                @if (Model.Rol.Equals("Administrador"))
+                                {
+                                    <a asp-action="RenderDetails" asp-route-id="@item.Id" asp-route-eliminateFlag="true"
+                                        title="Eliminar" class="btn btn-sm btn-danger py-1 px-2 btn_delete"><i
+                                            class="bi bi-trash-fill text-light"></i></a>
+                                }
 
-                            <p class="text-end small">Contrato n° @contrato.Id</p>
-                        </div>
+                            </td>
+                        </tr>
+                        <tr class="d-lg-none">
+                            <td colspan="6" class="p-0">
+                                <div class="collapse d-lg-none" id="collaps-@item.Id">
+                                    <p>
+                                        Fecha finalizacion: @item.GetFechaFormateada(item.FechaFinalizacion)
+                                    </p>
+                                    <p>
+                                        Precio : $@item.Monto.ToString("N2")
+                                    </p>
 
-                        <div class="">
-                            <p>Departamento</p>
-                            <p><i class="bi bi-geo-alt-fill"></i> @Html.DisplayFor(contratoItem => contrato.Inmueble.Direccion)</p>
-                            <p>@contrato.GetFechaFormateada(contrato.FechaDesde) - @contrato.GetFechaFormateada(contrato.FechaHasta)</p>
-                            <p>$45.000/mes</p>
-                        </div>
+                                    <p> @Html.DisplayNameFor(model => model.Contratos.FirstOrDefault().Inquilino) :
+                                        @item.Inquilino.ToString()</p>
 
-                        <div class="row">
-                            <div class="col-6 border-end">
-                                <h6>Propietario</h6>
-                                <p>apellido, nombre, dni...</p>
-                                <p>33.345.432</p>
-                            </div>
+                                    <p> @Html.DisplayNameFor(model => model.Contratos.FirstOrDefault().Inmueble.Duenio) :
+                                        @item.Inmueble.Duenio.Apellido, @item.Inmueble.Duenio.Nombre,
+                                        @item.Inmueble.Duenio.Dni</p>
 
-                            <div class="col-6">
-                                <h6>Inquilino</h6>
-                                <p>@contrato.Inquilino.ToString()</p>
-                            </div>
+                                    <p> @Html.DisplayNameFor(model => model.Contratos.FirstOrDefault().Inmueble) :
+                                        @item.Inmueble.Direccion
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
 
-                            <div class="col-6">
-                                <a class="btn btn-outline-danger border-0 btn-sm rounded-4 align-bottom">Eliminar</a>
-                                <a class="btn btn-outline-info border-info-subtle btn-sm rounded-4 align-bottom">Ver más</a>
-                            </div>
+                    }
+                </tbody>
 
-                            <div class="col-6 pt-2 text-end">
-                                <a class="btn btn-success btn-lg rounded-5 px-4">Pagar</a>
-                            </div>
-                            
-                        </div>
-                    </div>
-
-                }
-                
-            }
-        }
-        
-       
-            <div class="col-12 col-sm-6 col-lg-4 p-4 position-relative text-start shadow rounded">
-                <div>
-                    <!--<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info p-3"><i
-                            class="bi bi-house-door"></i></span>-->
-
-                    <p class="text-end small">Contrato n°</p>
-                </div>
-                <div>
-                    <p>Departamento</p>
-                    <p>Argentina, San Luis, San Luis, asdf 12</p>
-                    <p>$45.000/mes</p>
-                    <p>23/04/24 - 23/04/25</p>
-                     </div>
-                <div class="row">
-                    <div class="col-6 border-end">
-                        <h6>Propietario</h6>
-                        <p>Young Florence</p>
-                        <p>33.345.432</p>
-                    </div>
-                    <div class="col-6">
-                        <h6>Inquilino</h6>
-                        <p>Young Florence</p>
-                        <p>33.345.432</p>
-                    </div><div class="col-6">
-                        <a class="btn btn-outline-danger border-0 btn-sm rounded-4 align-bottom">Eliminar</a>
-                        <a class="btn btn-outline-info border-info-subtle btn-sm rounded-4 align-bottom">Ver más</a>
-                    </div>
-                    <div class="col-6 pt-2 text-end">
-                        <a class="btn btn-success btn-lg rounded-5 px-4">Pagar</a>
-                    </div>
-                </div>
-            </div>
+            </table>
+        </div>
+        <div class="col">
+            <partial name="_Pagination" />
         </div>
 
-    </div>
+        @section Scripts {
 
-</div>
+            @{
+                if (Model != null && Model.ToastMessage != null)
+                {
+                    <text>
+                        <script>
+                            const Rol = "@Model.Rol";
+                            $(document).ready(function () {
+                                var toastMessage = "@Model.ToastMessage";
+                                if (toastMessage) {
+                                    $("#toastMessage").text(toastMessage);
+                                    $("#liveToast").toast("show");
+                                }
+
+                            })
+                        </script>
+                    </text>
+                }
+            }
+            <link href="https://cdn.datatables.net/v/bs5/dt-2.1.5/fh-4.0.1/r-3.0.3/sp-2.3.2/sl-2.0.5/datatables.min.css"
+                rel="stylesheet">
+
+            <script
+                src="https://cdn.datatables.net/v/bs5/dt-2.1.5/fh-4.0.1/r-3.0.3/sp-2.3.2/sl-2.0.5/datatables.min.js"></script>
+
+            
+            <script src="~/js/validationFun.js"></script>
+
+            <script src="~/js/contratoIndex.js"></script>
+        }
+    </div>
