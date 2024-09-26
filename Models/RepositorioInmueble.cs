@@ -105,7 +105,7 @@ public class RepositorioInmueble
                             p.{nameof(Propietario.Apellido)} AS ApellidoPropietario
                      FROM Inmuebles i 
                      INNER JOIN Propietarios p ON i.{nameof(Inmueble.IdPropietario)} = p.{nameof(Propietario.IdPropietario)}
-                     WHERE i.{nameof(Inmueble.Estado)} = Disponible";
+                     WHERE i.{nameof(Inmueble.Estado)} = 'Disponible'";
 
             using (var command = new MySqlCommand(sql, connection))
             {
