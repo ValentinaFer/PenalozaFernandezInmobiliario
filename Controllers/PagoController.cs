@@ -40,13 +40,11 @@ public class PagoController : Controller
                 throw new ArgumentException("No se recibio el ID del contrato.");
             }
             var contrato = rpP.ObtenerPagosPorContrato(idContrato);
-            var datos = rpP.ObtenerCalculos(contrato);
-            if (contrato == null)
-            {
+            if (contrato == null){
                 throw new KeyNotFoundException("¡Contrato no encontrado!");
             }
-
-            return Json(contrato);
+            var datos = rpP.ObtenerCalculos(contrato);
+            return Json(new { calculos = datos, contrato = contrato});
         }
         catch (KeyNotFoundException ex)
         {

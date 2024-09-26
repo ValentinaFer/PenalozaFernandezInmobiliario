@@ -163,46 +163,37 @@ $(document).ready(function () {
             $.ajax({
                 url: `/Contrato/Pagos/${idContrato}`,
                 type: "GET",
-            }).done(function (data) {
-                console.log(data);
-                const idContrato = data.id;
-                const totalMesesPagados = getMesesPagados(data);
+            }).done(function (d) {
+                console.log(d);
+                const calculos = d.calculos
+                const data = d.contrato
+                let titulo = "";
+                let subtitulo = "";
+                const totalMesesPagados = calculos.mesesPagadosSinMulta;
                 const totalMeses = getMeses(data.fechaDesde, data.fechaHasta);
-                const totalPagado = totalMesesPagados * data.monto;
-                const totalAPagar = totalMeses * data.monto;
+                let totalAPagarFinal = calculos.faltanteAPagar;
+                const totalPagado = calculos.totalPagado;
+                const totalAPagar = calculos.totalAPagar;
+                const mesesHastaFinDecimal = calculos.mesesHastaFinalizacion;
+                const multa = calculos.multa;
                 const precioMensual = data.monto;
-                let totalAPagarConMulta = 0;
-                let titulo;
-                let multa = 0;
-                let faltante = 0;
                 let multaData = "";
-                let totalAPagarFinal = 0;
+                let showMultaHint = false;
+                if (calculos.contratoPagado) {
+                    subtitulo = "Pagado"
+                } else {
+                    subtitulo = "No Pagado"
+                }
                 if (data.fechaFinalizacion == null) {
                     titulo = "Contrato Vigente"
                 } else if (data.fechaFinalizacion < data.fechaHasta) {
-                    
-                    const totalMeses = getMeses(data.fechaDesde, data.fechaHasta);
-                    const totalAPagar = totalMeses * data.monto;
-                    const totalMesesPagados = getMesesPagados(data);
-                    const totalPagado = totalMesesPagados * data.monto;
-                    let mesesHastaFinDecimal = Math.ceil(getMesesEnDecimal(data.fechaDesde, data.fechaFinalizacion));
-                    if (mesesHastaFinDecimal < 0) {
-                        mesesHastaFinDecimal = 0;
-                    }
-                    const multa = calcularMulta(data.fechaDesde, data.fechaHasta, data.fechaFinalizacion, data.monto);
-                    
-                    totalAPagarFinal = (mesesHastaFinDecimal * data.monto) - totalPagado + multa;
-                    if (totalAPagarFinal < 0) {
-                        totalAPagarFinal = 0;
-                    }
-                    
+                    showMultaHint = true;
                     titulo = "Contrato Cancelado"
-                    multaData = `<p>Precio mensual: ${formatPrices(data.monto)}</p>
-                                    <p>Meses hasta la fecha : ${mesesHastaFinDecimal <= 0 ? "0 meses. (cancelado antes de inicio)" : mesesHastaFinDecimal}</p>
-                                    <p>Multa: ${formatPrices(multa)}</p>
-                                    <p>Cobro por meses faltantes: ${formatPrices(totalAPagarFinal)}</p>
-                                    <hr>
-                                    <p><strong>Total a pagar: ${formatPrices(totalAPagarFinal)} </strong></p>`;
+                    multaData = `
+                        <p>Meses hasta la fecha : ${mesesHastaFinDecimal <= 0 ? "0 meses. (cancelado antes de inicio)" : Math.ceil(mesesHastaFinDecimal)}</p>
+                        <p>Multa: ${formatPrices(multa)}</p>
+                        <p>Cobro por meses faltantes: ${formatPrices(totalAPagarFinal - multa)}</p>
+                        `;
 
                 } else if (data.fechaFinalizacion >= data.fechaHasta) {
                     titulo = "Contrato Finalizado"
@@ -218,6 +209,7 @@ $(document).ready(function () {
                     animation: false,
                     html: `<table id="pagosTable" class="table table-sm table-responsive table-hover table-striped display" width="100%">
                             <h3>${titulo}</h3>
+                            <h4>${subtitulo}</h4>
                             <p>${formatDate(data.fechaDesde)} - ${formatDate(data.fechaHasta)} ${data.fechaFinalizacion ? ` (${formatDate(data.fechaFinalizacion)})` : ""}</p>
                             <h4 id="message" class="d-none"></h4>
                             <thead>
@@ -235,8 +227,10 @@ $(document).ready(function () {
                             </table>
                             <div class="row">
                                 <p> Meses pagados: ${totalMesesPagados} / ${totalMeses}</p>
-                                <p> Total Pagado: ${formatPrices(totalPagado)} / ${formatPrices(totalAPagar)} (${formatPrices(precioMensual)}/mes)</p> 
+                                <p> Total Pagado${showMultaHint?"(Sin multa)":""}: ${formatPrices(totalPagado)} / ${formatPrices(totalAPagar)} (${formatPrices(precioMensual)}/mes)</p> 
                                 ${multaData}
+                                <hr>
+                                <p><strong>Total a pagar: ${formatPrices(totalAPagarFinal)} </strong></p>
                             </div>
                             <hr>
                             <h3>Agregar nuevo Pago</h3>

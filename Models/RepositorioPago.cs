@@ -51,8 +51,10 @@ public class RepositorioPago
     {
         var res = new CalculosContratoResponse();
         bool contratoPagado = false;
+        decimal mitadContrato = 0;
         decimal mesesHastaFinalizacion = 0;
         decimal APagar = 0;
+        bool Vencido = false;
         bool cancelado = false;
         decimal loQueQueda = 0; //lo que queda por pagar
         int mesesPagados = contrato.Pagos != null ? contrato.Pagos.Count(p => p.Estado) : 0; //se asume que no tiene pagos en este caso
@@ -73,10 +75,11 @@ public class RepositorioPago
             cancelado = true;
             Console.WriteLine("contrato finalizado");
             mesesHastaFinalizacion = CalculateMonthsAsDecimal(contrato.FechaDesde, contrato.FechaFinalizacion.Value);
-            decimal mitadContrato = mesesTotales / 2;
+            mitadContrato = (decimal)mesesTotales / 2;
+
             Console.WriteLine($"Meses hasta finalizacion: {mesesHastaFinalizacion}");
             Console.WriteLine($"Mitad del contrato: {mitadContrato}");
-            if (mesesHastaFinalizacion >= mitadContrato)
+            if (mesesHastaFinalizacion < mitadContrato)
             {
                 multa = contrato.Monto * 2;
             }
@@ -84,8 +87,16 @@ public class RepositorioPago
             {
                 multa = contrato.Monto;
             }
+            if (mesesHastaFinalizacion < 0)
+            {
+                mesesHastaFinalizacion = 0;
+            }
             var mesesAPagarRestantes = Math.Ceiling(mesesHastaFinalizacion) - mesesPagados;
             Console.WriteLine($"Meses a pagar restantes: {mesesAPagarRestantes}");
+            if (mesesAPagarRestantes < 0)
+            {
+                mesesAPagarRestantes = 0;
+            }
             loQueQueda = (mesesAPagarRestantes * contrato.Monto) + multa;
             Console.WriteLine($"loQueQueda: {loQueQueda}");
             Console.WriteLine($"Multa: {multa}");
@@ -95,14 +106,27 @@ public class RepositorioPago
         {
             contratoPagado = true;
         }
+        else if (contrato.FechaHasta >= contrato.FechaFinalizacion)
+        {
+            Vencido = true;
+        }
 
-        res = new CalculosContratoResponse{
-            ContratoPagado = contratoPagado,
-            TotalAPagarConMulta = loQueQueda,
-            TotalAPagarSinMulta = APagar,
-            Multa = multa,
+        res = new CalculosContratoResponse
+        {
+            Vencido = Vencido,
+            MesesPagadosSinMulta = mesesPagados,
+            MesesTotales = mesesTotales,
+            TotalPagado = mesesPagados * contrato.Monto,
+            TotalAPagar = mesesTotales * contrato.Monto,
+            //lo de arriba es para un contrato normal(aka. vigente)
+            FaltanteAPagar = loQueQueda,
+
             MesesHastaFinalizacion = mesesHastaFinalizacion,
+            MesesMulta = (mesesHastaFinalizacion >= mitadContrato) ? 2 : 1,
+            Multa = multa,
+
             Cancelado = cancelado,
+            ContratoPagado = contratoPagado
         };
 
         return res;
@@ -148,7 +172,7 @@ public class RepositorioPago
                 decimal mitadContrato = mesesTotales / 2;
                 Console.WriteLine($"Meses hasta finalizacion: {mesesHastaFinalizacion}");
                 Console.WriteLine($"Mitad del contrato: {mitadContrato}");
-                if (mesesHastaFinalizacion >= mitadContrato)
+                if (mesesHastaFinalizacion < mitadContrato)
                 {
                     multa = contrato.Monto * 2;
                 }
@@ -156,8 +180,16 @@ public class RepositorioPago
                 {
                     multa = contrato.Monto;
                 }
+                if (mesesHastaFinalizacion < 0)
+                {
+                    mesesHastaFinalizacion = 0;
+                }
                 var mesesAPagarRestantes = Math.Ceiling(mesesHastaFinalizacion) - mesesPagados;
                 Console.WriteLine($"Meses a pagar restantes: {mesesAPagarRestantes}");
+                if (mesesAPagarRestantes < 0)
+                {
+                    mesesAPagarRestantes = 0;
+                }
                 loQueQueda = (mesesAPagarRestantes * contrato.Monto) + multa;
                 Console.WriteLine($"loQueQueda: {loQueQueda}");
                 Console.WriteLine($"Multa: {multa}");
@@ -502,7 +534,7 @@ public class RepositorioPago
                 decimal mitadContrato = mesesTotales / 2;
                 Console.WriteLine($"Meses hasta finalizacion: {mesesHastaFinalizacion}");
                 Console.WriteLine($"Mitad del contrato: {mitadContrato}");
-                if (mesesHastaFinalizacion >= mitadContrato)
+                if (mesesHastaFinalizacion < mitadContrato)
                 {
                     multa = contrato.Monto * 2;
                 }
@@ -510,11 +542,23 @@ public class RepositorioPago
                 {
                     multa = contrato.Monto;
                 }
+                if (mesesHastaFinalizacion < 0)
+                {
+                    mesesHastaFinalizacion = 0;
+                }
                 var mesesAPagarRestantes = Math.Ceiling(mesesHastaFinalizacion) - mesesPagados;
                 Console.WriteLine($"Meses a pagar restantes: {mesesAPagarRestantes}");
+                if (mesesAPagarRestantes < 0)
+                {
+                    mesesAPagarRestantes = 0;
+                }
                 loQueQueda = (mesesAPagarRestantes * contrato.Monto) + multa;
                 Console.WriteLine($"loQueQueda: {loQueQueda}");
                 Console.WriteLine($"Multa: {multa}");
+            }
+            else
+            {
+                throw new Exception("No hay pagos pendientes");
             }
 
             if (loQueQueda == 0)
