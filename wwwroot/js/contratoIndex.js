@@ -189,10 +189,11 @@ $(document).ready(function () {
                 } else if (data.fechaFinalizacion < data.fechaHasta) {
                     showMultaHint = true;
                     titulo = "Contrato Cancelado"
+                    const mesesRestantes = totalAPagarFinal - multa;
                     multaData = `
                         <p>Meses hasta la fecha : ${mesesHastaFinDecimal <= 0 ? "0 meses. (cancelado antes de inicio)" : Math.ceil(mesesHastaFinDecimal)}</p>
                         <p>Multa: ${formatPrices(multa)}</p>
-                        <p>Cobro por meses faltantes: ${formatPrices(totalAPagarFinal - multa)}</p>
+                        <p>Cobro por meses faltantes: ${formatPrices(mesesRestantes<0?0:mesesRestantes)}</p>
                         `;
 
                 } else if (data.fechaFinalizacion >= data.fechaHasta) {
@@ -300,7 +301,7 @@ $(document).ready(function () {
                     },
                     preConfirm: () => {
                         //const importeNuevo = $("#pagoImporte").val();
-                        if (data.fechaFinalizacion == null || (data.fechaFinalizacion < data.fechaHasta)) { //vigente o cancelado
+                        if (calculos.contratoPagado == false) {
                             const detalle = $("#pagoDetalle").val();
                             if (detalle.trim() == "") {
                                 Swal.showValidationMessage("Por favor, ingrese una descripción")
@@ -311,7 +312,7 @@ $(document).ready(function () {
                                 return false;
                             }
                             return detalle;
-                        } else if (totalAPagar == totalPagado) {
+                        } else {
                             Swal.showValidationMessage("Ya se ha completado la renta. No se pueden agregar más pagos.")
                             return false;
                         }

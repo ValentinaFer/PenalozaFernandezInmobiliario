@@ -93,10 +93,7 @@ public class RepositorioPago
             }
             var mesesAPagarRestantes = Math.Ceiling(mesesHastaFinalizacion) - mesesPagados;
             Console.WriteLine($"Meses a pagar restantes: {mesesAPagarRestantes}");
-            if (mesesAPagarRestantes < 0)
-            {
-                mesesAPagarRestantes = 0;
-            }
+
             loQueQueda = (mesesAPagarRestantes * contrato.Monto) + multa;
             Console.WriteLine($"loQueQueda: {loQueQueda}");
             Console.WriteLine($"Multa: {multa}");
@@ -186,10 +183,7 @@ public class RepositorioPago
                 }
                 var mesesAPagarRestantes = Math.Ceiling(mesesHastaFinalizacion) - mesesPagados;
                 Console.WriteLine($"Meses a pagar restantes: {mesesAPagarRestantes}");
-                if (mesesAPagarRestantes < 0)
-                {
-                    mesesAPagarRestantes = 0;
-                }
+
                 loQueQueda = (mesesAPagarRestantes * contrato.Monto) + multa;
                 Console.WriteLine($"loQueQueda: {loQueQueda}");
                 Console.WriteLine($"Multa: {multa}");
@@ -548,13 +542,11 @@ public class RepositorioPago
                 }
                 var mesesAPagarRestantes = Math.Ceiling(mesesHastaFinalizacion) - mesesPagados;
                 Console.WriteLine($"Meses a pagar restantes: {mesesAPagarRestantes}");
-                if (mesesAPagarRestantes < 0)
-                {
-                    mesesAPagarRestantes = 0;
-                }
+
                 loQueQueda = (mesesAPagarRestantes * contrato.Monto) + multa;
                 Console.WriteLine($"loQueQueda: {loQueQueda}");
                 Console.WriteLine($"Multa: {multa}");
+
             }
             else
             {
