@@ -519,6 +519,41 @@ public class RepositorioInmueble
         return disponible;
     }
 
+//checkea la disponibilidad de un inmueble en un rango de fechas y en base al contrato, dejando fuera el rango de fechas propias
+    public bool CheckDisponibilidadDiscrim(int contratoId, int inmuebleId, DateTime startDate, DateTime endDate){
+        var disponible = false;
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            var sql = @$"SELECT IFNULL(COUNT(contratos.id),0) 
+            FROM `inmuebles`
+            LEFT JOIN contratos ON 
+            contratos.inmuebleId = inmuebles.idInmueble 
+            AND contratos.estado = 1
+            AND contratos.{nameof(Contrato.Id)} != @contratoId
+            AND (contratos.fechaHasta >= @startDate AND contratos.fechaDesde <= @endDate) 
+            AND (contratos.fechaFinalizacion IS NULL OR (contratos.FechaFinalizacion >= contratos.fechaHasta))
+            WHERE inmuebles.idInmueble = @inmuebleId AND inmuebles.estado = 'Disponible';";
+
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@contratoId", contratoId);
+                command.Parameters.AddWithValue("@inmuebleId", inmuebleId);
+                command.Parameters.AddWithValue("@startDate", startDate.ToString("yyyy-MM-dd"));
+                command.Parameters.AddWithValue("@endDate", endDate.ToString("yyyy-MM-dd"));
+                connection.Open();
+                var result = Convert.ToInt32(command.ExecuteScalar());
+                connection.Close();
+                if (result == 0)
+                {
+                    disponible = true;
+                }
+
+            };
+
+        }
+        return disponible;
+    }
+
     
 }
 

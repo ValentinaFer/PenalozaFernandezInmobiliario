@@ -18,6 +18,37 @@ $(document).ready(function () {
         }).format(val);
     }
 
+    $(".btn_activar").on("click", function () {
+        const idContrato = $(this).data("id");
+        console.log(idContrato);
+        fireActiveModal(idContrato);
+    });
+
+    function fireActiveModal(idContrato) {
+        if (isNumber(idContrato) && idContrato > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: '¿Desea reactivar el contrato?',
+                showDenyButton: true,
+                showCancelButton: false,
+                confirmButtonText: 'Activar',
+                denyButtonText: `Cancelar`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    activeContrato(idContrato);
+                }
+            })
+    }}
+
+    function activeContrato(idContrato) {
+        $.ajax({
+            url: `/Contrato/Active/${idContrato}`,
+            type: "GET",
+        }).done(function () {
+            window.location.reload();
+        });
+    }
+
     $(".btn_cancelar").on("click", function () {
         const idContrato = $(this).data("id");
         console.log(idContrato);
@@ -55,8 +86,9 @@ $(document).ready(function () {
                     const multa = calcularMulta(data.fechaDesde, data.fechaHasta, data.fechaFinalizacion, data.monto);
                     Swal.fire({
                         title: 'Cancelar Contrato nro. ' + idContrato,
-                        text: '¿Seguro que desea cancelar el contrato antes de tiempo?',
                         html: `<div class="row">
+                        <h4 class="text-danger">¿Seguro que desea anular el contrato antes de tiempo?</h4>
+                        <h5 class="text-danger">¡Esta accion no se puede deshacer!</h5>
                                 <div class="col-12">
                                     <p>Precio mensual: ${formatPrices(data.monto)}</p>
                                     <p>Meses pagados: ${totalMesesPagados} / ${totalMeses}</p>
@@ -69,9 +101,10 @@ $(document).ready(function () {
                                 </div>`,
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Sí, cancelar'
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        cancelButtonText: 'No, volver',
+                        confirmButtonText: 'Sí, anular contrato'
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $.ajax({
@@ -135,27 +168,7 @@ $(document).ready(function () {
         return totalMonths + partialStartMonth + partialEndMonth - 1;
     }
 
-    function calcularMulta(fechaDesde, fechaHasta, fechaFinalizacion, precio) {
-        let multa = 0;
-        if (fechaDesde && fechaHasta) {
-            fechaDesde = new Date(fechaDesde);
-            fechaHasta = new Date(fechaHasta);
-            const mesesTotales = ((fechaHasta.getFullYear() - fechaDesde.getFullYear()) * 12) + (fechaHasta.getMonth() - fechaDesde.getMonth() + 1);
-            const mesesHastaFinDecimal = getMesesEnDecimal(fechaDesde, fechaFinalizacion);
-            console.log(mesesHastaFinDecimal, mesesTotales/2);
-            if (mesesHastaFinDecimal > mesesTotales / 2) {
-                multa = precio * 2;
-            } else {
-                multa = precio * 1;
-            }
-        }
-        return multa;
-    }
 
-    function calcularData(contrato){
-        const multa = calcularMulta(contrato.fechaDesde, contrato.fechaHasta, contrato.fechaFinalizacion,contrato.monto);
-        
-    }
 
     function fireMainModal(idContrato, message = "", showMsg = false) {
         if (isNumber(idContrato) && idContrato > 0) {

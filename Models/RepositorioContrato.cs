@@ -15,6 +15,162 @@ public class RepositorioContrato
 
     }
 
+    public int Update(int idContrato, int inquilinoId, int inmuebleId, DateTime dFrom, DateTime dTo)
+    {
+        int result = -1;
+        try
+        {
+
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
+                var sql = @$"UPDATE contratos SET 
+                {nameof(Contrato.InquilinoId)} = @inquilinoId,
+                {nameof(Contrato.InmuebleId)} = @inmuebleId,
+                {nameof(Contrato.FechaDesde)} = @dFrom,
+                {nameof(Contrato.FechaHasta)} = @dTo,
+                {nameof(Contrato.Monto)} = (SELECT {nameof(Inmueble.Precio)} FROM inmuebles WHERE {nameof(Inmueble.IdInmueble)} = @inmuebleId)
+                WHERE {nameof(Contrato.Id)} = @id;";
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", idContrato);
+                    command.Parameters.AddWithValue("@inquilinoId", inquilinoId);
+                    command.Parameters.AddWithValue("@inmuebleId", inmuebleId);
+                    command.Parameters.AddWithValue("@dFrom", dFrom);
+                    command.Parameters.AddWithValue("@dTo", dTo);
+                    connection.Open();
+                    result = command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw new Exception(ex.Message);
+        }
+        return result;
+    }
+
+    public int UpdateMejorado(int idContrato, int inquilinoId, int inmuebleId, DateTime dFrom, DateTime dTo)
+    {
+        int result = -1;
+        try
+        {
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        var sql = @$"UPDATE contratos SET 
+                    {nameof(Contrato.InquilinoId)} = @inquilinoId,
+                    {nameof(Contrato.InmuebleId)} = @inmuebleId,
+                    {nameof(Contrato.FechaDesde)} = @dFrom,
+                    {nameof(Contrato.FechaHasta)} = @dTo,
+                    {nameof(Contrato.Monto)} = (SELECT {nameof(Inmueble.Precio)} FROM inmuebles WHERE {nameof(Inmueble.IdInmueble)} = @inmuebleId)
+                    WHERE {nameof(Contrato.Id)} = @id;";
+                        using (var command = new MySqlCommand(sql, connection))
+                        {
+                            command.Parameters.AddWithValue("@id", idContrato);
+                            command.Parameters.AddWithValue("@inquilinoId", inquilinoId);
+                            command.Parameters.AddWithValue("@inmuebleId", inmuebleId);
+                            command.Parameters.AddWithValue("@dFrom", dFrom);
+                            command.Parameters.AddWithValue("@dTo", dTo);
+
+                            result = command.ExecuteNonQuery();
+
+                            if (result <= 0)
+                            {
+                                throw new Exception("No rows updated for the contract.");
+                            }
+                        }
+
+                        //Elimino pagos para evitar poder habilitar pagos con montos de propiedades anteriores o con montos viejos
+                        var sql2 = @$"DELETE FROM pagos WHERE {nameof(Pago.IdContrato)} = @id;";
+                        using (var command2 = new MySqlCommand(sql2, connection))
+                        {
+                            command2.Parameters.AddWithValue("@id", idContrato);
+                            int result2 = command2.ExecuteNonQuery();
+
+                            Console.WriteLine($"Deleted {result2} pagos from {idContrato}."); 
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine(ex.Message);
+                        throw;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw new Exception(ex.Message);
+        }
+
+        return result;
+    }
+
+    public int Reactivar(int idContrato){
+        int result = -1;
+        try
+        {
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
+                var sql = @$"UPDATE contratos SET 
+                {nameof(Contrato.Estado)} = 1
+                WHERE {nameof(Contrato.Id)} = @id;";
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", idContrato);
+                    connection.Open();
+                    result = command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            return result;
+        } 
+        catch (Exception ex) {
+            Console.WriteLine(ex.Message);
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public int UpdateInquilino(int idContrato, int idInquilino)
+    {
+        int result = -1;
+        try
+        {
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
+                var sql = @$"UPDATE contratos SET 
+                {nameof(Contrato.InquilinoId)} = @idInquilino
+                WHERE {nameof(Contrato.Id)} = @id;";
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", idContrato);
+                    command.Parameters.AddWithValue("@idInquilino", idInquilino);
+                    connection.Open();
+                    result = command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw new Exception(ex.Message);
+        }
+        return result;
+    }
+
     public int CambiarAVigente(int idContrato)
     {
         int result = -1;
@@ -43,15 +199,19 @@ public class RepositorioContrato
         return result;
     }
 
-    public int CancelarContrato(int id){
+    public int CancelarContrato(int id)
+    {
         int result = -1;
-        try {
-            using (var connection = new MySqlConnection(ConnectionString)) {
+        try
+        {
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
                 var sql = @$"UPDATE contratos SET
                 {nameof(Contrato.FechaFinalizacion)} = IF(CURRENT_DATE() >= {nameof(Contrato.FechaHasta)}, DATE_SUB({nameof(Contrato.FechaHasta)}, INTERVAL 1 DAY), CURRENT_DATE())
                 WHERE {nameof(Contrato.Id)} = @id;";
-            
-                using (var command = new MySqlCommand(sql, connection)) {
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
                     command.Parameters.AddWithValue("@id", id);
                     connection.Open();
                     result = command.ExecuteNonQuery();
@@ -59,7 +219,9 @@ public class RepositorioContrato
                 }
             }
 
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             Console.WriteLine(ex.Message);
             throw new Exception(ex.Message);
         }
@@ -93,11 +255,17 @@ public class RepositorioContrato
         return result;
     }
 
-    public IList<Contrato> GetAllForIndex(int pageSize, int pageNumber, bool activos = true)
+    public IList<Contrato> GetAllForIndex(int pageSize, int pageNumber, string todos = "activos")
     {
         var contratos = new List<Contrato>();
         using (var connection = new MySqlConnection(ConnectionString))
         {
+            var traerEstado = "";
+            if (todos.Equals("activos")){
+                traerEstado = @$"WHERE c.{nameof(Contrato.Estado)} = 1";
+            } else if (todos.Equals("inactivos")){
+                traerEstado = @$"WHERE c.{nameof(Contrato.Estado)} = 0";
+            }
             var sql = @$"SELECT c.{nameof(Contrato.Id)}, c.{nameof(Contrato.InmuebleId)}, c.{nameof(Contrato.Monto)}, c.{nameof(Contrato.FechaDesde)}, c.{nameof(Contrato.FechaHasta)}, c.{nameof(Contrato.FechaFinalizacion)}, c.{nameof(Contrato.Estado)},
             inq.{nameof(Inquilino.Id)}, inq.{nameof(Inquilino.Apellido)},  inq.{nameof(Inquilino.Nombre)},  inq.{nameof(Inquilino.Dni)},
             p.{nameof(Propietario.IdPropietario)}, p.{nameof(Propietario.Apellido)} AS propApellido, p.{nameof(Propietario.Nombre)} AS propNombre, p.{nameof(Propietario.Dni)} AS propDni,
@@ -106,12 +274,12 @@ public class RepositorioContrato
             INNER JOIN Inmuebles inm ON c.{nameof(Contrato.InmuebleId)} = inm.{nameof(Inmueble.IdInmueble)}
             INNER JOIN Propietarios p ON inm.{nameof(Inmueble.IdPropietario)} = p.{nameof(Propietario.IdPropietario)}
             INNER JOIN {Inquilino.GetTableName()} inq ON c.{nameof(Contrato.InquilinoId)} = inq.{nameof(Inquilino.Id)}
-            WHERE c.{nameof(Contrato.Estado)} = @activos
+            {traerEstado}
             LIMIT {pageSize} OFFSET {(pageNumber - 1) * pageSize};";
 
             using (var command = new MySqlCommand(sql, connection))
             {
-                command.Parameters.AddWithValue("@activos", activos ? 1 : 0);
+
                 connection.Open();
                 using (var reader = command.ExecuteReader())
                 {
@@ -361,30 +529,55 @@ public class RepositorioContrato
     }
 
     //Trae contratos que ocupen fechas del inmueble por fuera del rango de fechas del contrato proveído
-    public List<Contrato> getOccupiedDatesDiscrim(int idContrato, int idInmueble){
+    public List<Contrato> getOccupiedDatesDiscrim(int idContrato, int idInmueble)
+    {
         var res = new List<Contrato>();
 
-            try {
-                if (idContrato <= 0 || idInmueble <= 0) {
-                    throw new Exception("idContrato o idInmueble invalidos");
-                }
+        try
+        {
+            if (idContrato <= 0 || idInmueble <= 0)
+            {
+                throw new Exception("idContrato o idInmueble invalidos");
+            }
 
-                using (var connection = new MySqlConnection(ConnectionString)) {
+            using (var connection = new MySqlConnection(ConnectionString))
+            {
 
-                    var sql = @$"SELECT 
+                var sql = @$"SELECT 
                         {nameof(Contrato.FechaDesde)}, IFNULL({nameof(Contrato.FechaFinalizacion)},{nameof(Contrato.FechaHasta)}) AS {nameof(Contrato.FechaHasta)}
                             FROM `contratos` 
-            JOIN `inmuebles` ON contratos.{nameof(Contrato.InmuebleId)} = inmuebles.{nameof(Inmueble.IdInmueble)} 
-            WHERE contratos.{nameof(Contrato.Estado)} = 1
-            AND (contratos.{nameof(Contrato.FechaFinalizacion)} IS NULL OR (contratos.{nameof(Contrato.FechaFinalizacion)} >= CURRENT_DATE() AND contratos.{nameof(Contrato.FechaFinalizacion)} >= contratos.{nameof(Contrato.FechaHasta)})) 
-            AND contratos.{nameof(Contrato.InmuebleId)} = @inmuebleId
-            AND inmuebles.{nameof(Inmueble.Estado)} = 'Disponible'";
+                            JOIN `inmuebles` ON contratos.{nameof(Contrato.InmuebleId)} = inmuebles.{nameof(Inmueble.IdInmueble)} 
+                            WHERE contratos.{nameof(Contrato.Estado)} = 1
+                            AND (contratos.{nameof(Contrato.FechaFinalizacion)} IS NULL OR (contratos.{nameof(Contrato.FechaFinalizacion)} >= CURRENT_DATE() AND contratos.{nameof(Contrato.FechaFinalizacion)} >= contratos.{nameof(Contrato.FechaHasta)})) 
+                            AND contratos.{nameof(Contrato.InmuebleId)} = @inmuebleId
+                            AND contratos.{nameof(Contrato.Id)} != @idContrato
+                            AND inmuebles.{nameof(Inmueble.Estado)} = 'Disponible'";
 
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@inmuebleId", idInmueble);
+                    command.Parameters.AddWithValue("@idContrato", idContrato);
+                    connection.Open();
+                    Console.WriteLine(sql);
+                    var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        res.Add(new Contrato
+                        {
+                            FechaDesde = reader.GetDateTime(nameof(Contrato.FechaDesde)),
+                            FechaHasta = reader.GetDateTime(nameof(Contrato.FechaHasta))
+                        });
+                    }
+                    connection.Close();
                 }
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-                throw new Exception(ex.Message);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw new Exception(ex.Message);
+        }
 
         return res;
     }

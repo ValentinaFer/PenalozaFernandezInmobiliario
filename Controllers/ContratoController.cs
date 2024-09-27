@@ -40,7 +40,8 @@ public class ContratoController : Controller
             var rol = User.IsInRole("Administrador") ? "Administrador" : "Empleado";
             if (lista.Count == 0 || lista == null) //Coming from Home
             {
-                lista = rp.GetAllForIndex(10, pageNumber);
+
+                lista = rp.GetAllForIndex(10, pageNumber, "activos");
 
             }
             foreach (var item in lista)
@@ -162,13 +163,11 @@ public class ContratoController : Controller
         try
         {
             UpsertContratoViewModel vm = new UpsertContratoViewModel();
-            vm.Inmuebles = (List<Inmueble>?) rpInm.GetAll();
-            vm.Inquilinos = (List<Inquilino>?)rpInq.GetAll();
-            vm.TipoInmuebles = (List<TipoInmueble>?)rpTipoInm.GetTipoInmuebles();
 
             if (id > 0)
             { //editando
                 vm.Contrato = rp.GetById(id);
+                vm.Pagos = rpPago.GetCount(id);
                 if (vm.Contrato == null)
                 {
                     TempData["ToastMessage"] = "No se pudo recuperar el contrato seleccionado!";
@@ -290,6 +289,26 @@ public class ContratoController : Controller
         }
         
     }
+
+     /*  [HttpPost("/Contrato/Active/{idContrato}")]
+    public IActionResult Reactivar(int idContrato){
+        try {
+            if (idContrato <= 0){
+                throw new ArgumentException("No se recibio el ID del contrato");
+            }
+            var res = rp.Reactivar(idContrato);
+            if (res < 0) {
+                throw new Exception("El contrato no pudo ser reactivado");
+            }
+            return Json(new { success = true });
+        } catch (ArgumentException ex) {
+            _logger.LogError(ex, ex.Message);
+            return StatusCode(400, new { message = ex.Message, exceptionType = "ArgumentException" });
+        } catch (Exception ex) {
+            _logger.LogError(ex, "Error al reactivar el contrato");
+            return StatusCode(500, new { message = "Ocurrio un error inesperado.", error = ex.Message });
+        }
+    }*/
 
     [HttpGet] //For DATATABLE
     public IActionResult GetInmuebles([FromQuery] string startDate, [FromQuery] string endDate, [FromQuery] string usoInmueble)
@@ -446,6 +465,7 @@ public class ContratoController : Controller
         
     }
 
+    [HttpGet("/Contrato/Inmueble/GetOccupiedMonths/{idContrato}/{idInmueble}")]
     public IActionResult getOccupiedDatesDiscrim(int idContrato, int idInmueble){
         try {
             if (idContrato <= 0 || idInmueble <= 0) {
@@ -457,6 +477,74 @@ public class ContratoController : Controller
             _logger.LogError(ex, ex.Message);
             return StatusCode(500, new { message = "Ocurrio un error inesperado.", error = ex.Message });
         }
+    }
+
+
+    public IActionResult Update(int inquilinoId, int inmuebleId, string dateFrom, string dateTo, int idContrato){
+
+        try {
+            if (idContrato <= 0){
+                throw new ArgumentException("No se recibio el ID del idContrato.");
+            } 
+            var pagos = rpPago.GetCount(idContrato);
+            if (pagos > 0){
+                throw new Exception("El contrato tiene pagos pendientes.");
+            }
+            if (inquilinoId <= 0 || inmuebleId <= 0){
+                throw new ArgumentException("No se recibio el ID del inquilino o del inmueble.");
+            }
+            
+            if (dateFrom == "" || dateTo == ""){
+                throw new ArgumentException("Las fechas no pueden estar vacias.");
+            }
+            bool isValidFrom = DateTime.TryParseExact(dateFrom, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dFrom);
+            bool isValidTo = DateTime.TryParseExact(dateTo, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dTo);
+
+            if (!isValidFrom || !isValidTo){
+                throw new ArgumentException("Las fechas no son validas.");
+            }
+            if (dFrom > dTo){
+                throw new ArgumentException("La fecha de inicio no puede ser mayor a la fecha de fin.");
+            }
+
+            Console.WriteLine($"Crear inquilinoId: {inquilinoId} inmuebleId: {inmuebleId} fechaDesde: {dateFrom} fechaHasta: {dateTo}");
+            
+            var inmueble = rpInm.GetAllDetailsById(inmuebleId);
+            if (inmueble == null){
+                throw new KeyNotFoundException("El inmueble no fue encontrado!");
+            }
+            if (!rpInm.CheckDisponibilidadDiscrim(idContrato,inmuebleId, dFrom, dTo)){
+                throw new Exception("Fuera de disponibilidad");
+            }
+
+            var res = rp.UpdateMejorado(idContrato, inquilinoId, inmuebleId, dFrom, dTo);
+            return Json("update");
+        } catch (Exception ex) {
+            _logger.LogError(ex, ex.Message);
+            return StatusCode(500, new { message = "Ocurrio un error inesperado.", error = ex.Message });
+        }
+        
+    }
+
+    [HttpPost("/Contrato/Update/Inquilino")]
+    public IActionResult UpdateInquilino(int idInquilino, int idContrato){
+        try {
+            if (idContrato <= 0 || idInquilino <= 0){
+                throw new ArgumentException("No se recibio el ID del idContrato o del idInquilino.");
+            }
+            var res = rp.UpdateInquilino(idContrato, idInquilino);
+            if (res < 0){
+                throw new Exception("El contrato no pudo ser actualizado.");
+            }
+            return Json(res);
+        } catch (ArgumentException ex){
+            _logger.LogError(ex, ex.Message);
+            return StatusCode(404, new { message = ex.Message, exceptionType = "KeyNotFoundException" });
+        }
+            catch (Exception ex){
+            _logger.LogError(ex, ex.Message);
+            return StatusCode(500, new { message = "Ocurrio un error inesperado.", error = ex.Message });
+        }   
     }
 
 }

@@ -103,7 +103,7 @@
                             <td class="text-nowrap text-end">
                                 <a asp-action="RenderDetails" asp-route-id="@item.Id" title="Ver detalles completos"
                                     class="btn btn-sm btn-info py-1 px-2"><i class="bi bi-eye-fill text-light"></i></a>
-                                <a asp-action="Upsert" asp-route-id="@item.Id" title="Renovar contrato"
+                                <a asp-action="Upsert" asp-route-id="@item.Id" title="Editar"
                                     class="btn btn-sm btn-primary py-1 px-2"><i
                                         class="bi bi-pencil-fill text-light"></i></a>
                                 <a data-id="@item.Id" title="Pagar" class="btn btn-sm btn-success py-1 px-2 btn_pagar"><i
@@ -116,8 +116,8 @@
                                 }
                                 else
                                 {
-                                    <a data-id="@item.Id" title="Activar" class="btn btn-sm btn-info py-1 px-2 btn_activar"><i
-                                            class="bi bi-calendar-x-fill"></i></a>
+                                    <button disabled data-id="@item.Id" title="Activar" class="btn btn-sm btn-info py-1 px-2 btn_activar"><i
+                                            class="bi bi-calendar-x-fill"></i></button>
                                 }
                                 @if (Model.Rol.Equals("Administrador"))
                                 {

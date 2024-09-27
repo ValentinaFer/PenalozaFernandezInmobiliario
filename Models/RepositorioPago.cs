@@ -15,6 +15,31 @@ public class RepositorioPago
 
     }
 
+    public int GetCount(int idContrato){
+
+        var res = 0;
+        try {
+
+            using (var connection = new MySqlConnection(ConnectionString)){
+                var sql = @$"SELECT COUNT({nameof(Pago.Id)})
+                    FROM Pagos
+                    WHERE {nameof(Pago.IdContrato)} = @idContrato
+                    AND {nameof(Pago.Estado)} = 1;";
+                using (var command = new MySqlCommand(sql, connection)){
+                    command.Parameters.AddWithValue("@idContrato", idContrato);
+                    connection.Open();
+                    res = Convert.ToInt32(command.ExecuteScalar());
+                    connection.Close();
+                }
+            }
+            
+        }catch (Exception ex){
+            Console.WriteLine(ex.Message);
+            throw new Exception(ex.Message);
+        }
+        return res;
+    }
+
     public int HabilitarPago(int idContrato, int idPago)
     {
         var res = -1;
