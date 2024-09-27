@@ -17,10 +17,10 @@
             if (Model != null && Model.ToastMessage != null)
             {
                 <text>
+                    @using System.Text.Json
                     <script>
                         $(document).ready(function () {
-
-                            var toastMessage = "@Model.ToastMessage";
+                            var toastMessage = @Html.Raw(JsonSerializer.Serialize(Model.ToastMessage));
                             if (toastMessage) {
                                 $("#toastMessage").text(toastMessage);
                                 $("#liveToast").toast("show");

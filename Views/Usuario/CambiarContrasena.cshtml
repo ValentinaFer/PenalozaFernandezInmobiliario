@@ -57,8 +57,9 @@
                 <text>
                     @using System.Text.Json
                     <script>
-                        const Rol = "@Model.Rol";
+                        
                         $(document).ready(function () {
+                            const Rol = "@Model.Rol";
                             var toastMessage = @Html.Raw(JsonSerializer.Serialize(Model.ToastMessage));
                             if (toastMessage) {
                                 $("#toastMessage").text(toastMessage);
