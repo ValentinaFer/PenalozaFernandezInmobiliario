@@ -186,10 +186,13 @@ namespace PenalozaFernandezInmobiliario.Controllers
                     ru.Update(usuarioViewModel.Usuario);
                     var ClaimsIdentity = User.Identity as ClaimsIdentity;
                     var claimAvatar = ClaimsIdentity.FindFirst("Avatar");
-
+                    if (claimAvatar != null){
+ClaimsIdentity.RemoveClaim(claimAvatar);
+                    }
+                        
                         ClaimsIdentity.AddClaim(new Claim("Avatar", usuarioViewModel.Usuario.Avatar));
-                    
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(ClaimsIdentity));
+                        Console.WriteLine(claimAvatar);
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(ClaimsIdentity));
 
                     TempData["ToastMessage"] = "Usuario editado con éxito!";
                 }
@@ -236,7 +239,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Update(Usuario usuario)
+        public IActionResult Update(Usuario usuario)
         {
             try
             {
