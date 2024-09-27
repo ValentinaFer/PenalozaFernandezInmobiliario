@@ -60,7 +60,6 @@ namespace PenalozaFernandezInmobiliario.Controllers
                             new Claim(ClaimTypes.Role, usuario.RolNombre),
                             new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString())
                         };
-
                         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));

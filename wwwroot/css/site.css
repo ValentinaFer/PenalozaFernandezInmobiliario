@@ -8,7 +8,11 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
@@ -24,14 +28,16 @@ body {
 
 }
 
-.custom-row{
+.custom-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
+
 .custom-col {
   padding: 1.75rem;
 }
+
 @media (max-width: 1280px) {
   .custom-row {
     grid-template-columns: repeat(3, 1fr);
@@ -43,6 +49,7 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
 @media (max-width: 768px) {
   .custom-row {
     grid-template-columns: repeat(1, 1fr);
@@ -79,4 +86,21 @@ body {
 
 .colored-toast .swal2-html-container {
   color: white;
+}
+
+
+.navbar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  /* Alinea verticalmente el contenido */
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+  /* Muestra el dropdown al hacer hover */
+}
+
+.dropdown-menu {
+  margin-top: 0;
+  /* Alinea el menú con el botón */
 }

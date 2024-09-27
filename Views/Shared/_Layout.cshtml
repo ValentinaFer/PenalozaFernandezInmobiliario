@@ -57,22 +57,42 @@
 
 
 
-
                             @if (User.IsInRole("Empleado"))
                             {
                                 var idUsuario = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-                                if (idUsuario != null) // Verificar que el idUsuario no sea null
+                                if (idUsuario != null)
                                 {
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Usuario" asp-action="Upsert"
-                                            asp-route-id="@idUsuario">
-                                            <i class="bi bi-person-circle text-primary p-2"></i>Perfil
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle text-dark" href="#" id="perfilDropdown" role="button">
+                                            <i class="bi bi-person-circle text-primary p-2" style="font-size: 1.5rem;"></i>Perfil
                                         </a>
+                                        <ul class="dropdown-menu" aria-labelledby="perfilDropdown">
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Usuario" asp-action="Upsert"
+                                                    asp-route-id="@idUsuario">
+                                                    Editar perfil
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Usuario" asp-action="CambiarContrasena"
+                                                    asp-route-id="@idUsuario">
+                                                    Cambiar contraseña
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <hr class="dropdown-divider" />
+                                            </li>
+                                            <li>
+                                                <form asp-controller="Account" asp-action="Logout" method="post"
+                                                    class="dropdown-item p-0 m-0">
+                                                    <button type="submit" class="dropdown-item text-start">Cerrar Sesión</button>
+                                                </form>
+                                            </li>
+                                        </ul>
                                     </li>
                                 }
                             }
-
 
                             @if (User.IsInRole("Administrador"))
                             {
@@ -88,14 +108,18 @@
                     <ul class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post"
-                                    style="display:inline;">
-                                    <button type="submit" class="nav-link btn-custom">
-                                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión (@User.Identity.Name)
-                                    </button>
-                                </form>
-                            </li>
+                            // Ocultar el botón de "Cerrar Sesión" si el usuario tiene el rol de "Empleado"
+                            if (!User.IsInRole("Empleado"))
+                            {
+                                <li class="nav-item">
+                                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post"
+                                        style="display:inline;">
+                                        <button type="submit" class="nav-link btn-custom">
+                                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión (@User.Identity.Name)
+                                        </button>
+                                    </form>
+                                </li>
+                            }
                         }
                         else
                         {
@@ -128,5 +152,3 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-
-</html>

@@ -13,7 +13,7 @@ namespace PenalozaFernandezInmobiliario.Models
             var tipoInmuebles = new List<TipoInmueble>();
             using (var connection = new MySqlConnection(ConnectionString))
             {
-                var sql = "SELECT id, tipo FROM tiposinmueble WHERE estado = 1;";
+                var sql = "SELECT DISTINCT id, tipo FROM tiposinmueble WHERE estado = 1;";
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     connection.Open();

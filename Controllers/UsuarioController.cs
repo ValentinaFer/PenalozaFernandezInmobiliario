@@ -29,9 +29,9 @@ namespace PenalozaFernandezInmobiliario.Controllers
         {
             try
             {
-                var lista = ru.GetAllForIndex(10, pageNumber, nombre); // Pasa el parámetro del nombre
+                var lista = ru.GetAllForIndex(10, pageNumber, nombre);
 
-                var totalEntries = ru.getTotalEntries(nombre); // Modifica este método para que cuente las entradas filtradas por nombre
+                var totalEntries = ru.getTotalEntries(nombre);
                 IndexUsuarioViewModel vm = new()
                 {
                     EsEmpleado = User.IsInRole("Empleado"),
@@ -52,19 +52,37 @@ namespace PenalozaFernandezInmobiliario.Controllers
         }
 
 
-
+        [Authorize]
         public IActionResult Upsert(int id)
         {
-            UpsertUsuarioViewModel viewModel = new UpsertUsuarioViewModel();
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+            var isAdmin = User.IsInRole("Administrador");
 
             try
             {
                 if (id > 0)
                 {
-                    viewModel.Usuario = ru.GetById(id);
-                    if (viewModel.Usuario != null)
+
+                    var usuario = ru.GetById(id);
+
+                    if (usuario != null)
                     {
-                        viewModel.Tittle = "Editando Usuario n°" + viewModel.Usuario.IdUsuario;
+
+                        if (userId != usuario.IdUsuario.ToString() && !isAdmin)
+                        {
+                            return Forbid();
+                        }
+
+
+                        var viewModel = new UpsertUsuarioViewModel
+                        {
+                            Usuario = usuario,
+                            Tittle = "Editando Usuario n°" + usuario.IdUsuario
+                        };
+
                         return View(viewModel);
                     }
                     else
@@ -75,8 +93,13 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 }
                 else
                 {
-                    viewModel.Tittle = "Creando Usuario";
-                    viewModel.Usuario = new Usuario();
+
+                    var viewModel = new UpsertUsuarioViewModel
+                    {
+                        Tittle = "Creando Usuario",
+                        Usuario = new Usuario()
+                    };
+
                     return View(viewModel);
                 }
             }
@@ -92,7 +115,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
+                //if (ModelState.IsValid)
                 {
                     if (!string.IsNullOrEmpty(usuarioViewModel.Usuario.Clave))
                     {
@@ -124,7 +147,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                         usuarioViewModel.Usuario.Avatar = "/avatars/" + newFileName;
                     }
 
-                    // Si no se selecciona un nuevo avatar, se mantiene el valor del avatar actual
+
                     if (usuarioViewModel.Usuario.IdUsuario > 0)
                     {
                         ru.Update(usuarioViewModel.Usuario);
@@ -136,7 +159,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                         TempData["ToastMessage"] = "Usuario creado con éxito!";
                     }
 
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Upsert", new { id = usuarioViewModel.Usuario.IdUsuario });
                 }
             }
             catch (Exception ex)
@@ -235,7 +258,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
             if (string.IsNullOrEmpty(claimValue))
             {
-                // Manejar el caso donde el Claim es nulo o vacío
+
                 return BadRequest("No se pudo obtener el identificador del usuario.");
             }
 
@@ -248,10 +271,96 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 ru.Update(usuario);
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Upsert", new { id = userId });
         }
 
+
+
+        [Authorize]
+        public IActionResult CambiarContrasena(int id)
+        {
+            var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (claimValue == null || int.Parse(claimValue) != id)
+            {
+                return Forbid();
+            }
+
+            var viewModel = new CambiarContraseñaViewModel { IdUsuario = id };
+            return View(viewModel);
+        }
+
+        // POST: Usuario/CambiarContrasena
+        [HttpPost]
+        [Authorize]
+        public IActionResult CambiarContrasena(CambiarContraseñaViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Obtener el ID del usuario autenticado
+                    var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (claimValue == null || model.IdUsuario != int.Parse(claimValue))
+                    {
+                        return Forbid();
+                    }
+
+                    // Obtener el usuario desde el repositorio
+                    var usuario = ru.GetById(model.IdUsuario);
+
+                    if (usuario == null)
+                    {
+                        ModelState.AddModelError("", "Usuario no encontrado.");
+                        return View(model);
+                    }
+
+                    // Verificar la contraseña actual
+                    string salt = configuration["Salt"];
+                    string hashedCurrentPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                        password: model.ContraseñaActual,
+                        salt: System.Text.Encoding.ASCII.GetBytes(salt),
+                        prf: KeyDerivationPrf.HMACSHA1,
+                        iterationCount: 1000,
+                        numBytesRequested: 256 / 8));
+
+                    if (hashedCurrentPassword != usuario.Clave)
+                    {
+                        ModelState.AddModelError("ContraseñaActual", "La contraseña actual es incorrecta.");
+                        return View(model);
+                    }
+
+                    // Verificar que la nueva contraseña y su confirmación coincidan
+                    if (model.NuevaContraseña != model.ConfirmarContraseña)
+                    {
+                        ModelState.AddModelError("ConfirmarContraseña", "La nueva contraseña y la confirmación no coinciden.");
+                        return View(model);
+                    }
+
+                    // Generar el hash de la nueva contraseña
+                    string hashedNewPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                        password: model.NuevaContraseña,
+                        salt: System.Text.Encoding.ASCII.GetBytes(salt),
+                        prf: KeyDerivationPrf.HMACSHA1,
+                        iterationCount: 1000,
+                        numBytesRequested: 256 / 8));
+
+                    // Actualizar la contraseña en la base de datos
+                    usuario.Clave = hashedNewPassword;
+                    ru.Update(usuario);
+
+                    TempData["ToastMessage"] = "¡Contraseña cambiada con éxito!";
+                    return RedirectToAction("Upsert", new { id = model.IdUsuario });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error al cambiar la contraseña");
+                    ModelState.AddModelError("", "Ocurrió un error al cambiar la contraseña.");
+                }
+            }
+
+            return View(model);
+        }
+
+
     }
-
-
 }
