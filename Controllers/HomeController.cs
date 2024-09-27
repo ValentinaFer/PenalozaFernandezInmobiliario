@@ -15,8 +15,9 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        var ToastMessage = GetToastMessage();
-        return View(new { ToastMessage }); 
+        ToastMsgViewModel vm = new ToastMsgViewModel();
+        vm.ToastMessage = GetToastMessage();
+        return View(vm); 
     }
 
     public IActionResult Privacy()
