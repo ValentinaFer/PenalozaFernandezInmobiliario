@@ -4,7 +4,11 @@ namespace PenalozaFernandezInmobiliario.Models
 {
     public class CambiarContraseñaViewModel
     {
+
         public int IdUsuario { get; set; }
+        public string? ToastMessage { get; set; }
+        public string? Rol { get; set; }
+        public string? Error { get; set; }
 
         [Required(ErrorMessage = "Debe ingresar la contraseña actual.")]
         [DataType(DataType.Password)]

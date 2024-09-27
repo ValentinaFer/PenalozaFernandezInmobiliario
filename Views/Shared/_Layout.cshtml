@@ -55,43 +55,48 @@
                                 </a>
                             </li>
 
-
-
                             @if (User.IsInRole("Empleado"))
                             {
                                 var idUsuario = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                                var avatar = User.Claims.FirstOrDefault(c => c.Type == "Avatar")?.Value;
 
-                                if (idUsuario != null)
-                                {
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle text-dark" href="#" id="perfilDropdown" role="button">
-                                            <i class="bi bi-person-circle text-primary p-2" style="font-size: 1.5rem;"></i>Perfil
-                                        </a>
-                                        <ul class="dropdown-menu" aria-labelledby="perfilDropdown">
-                                            <li>
-                                                <a class="dropdown-item" asp-controller="Usuario" asp-action="Upsert"
-                                                    asp-route-id="@idUsuario">
-                                                    Editar perfil
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" asp-controller="Usuario" asp-action="CambiarContrasena"
-                                                    asp-route-id="@idUsuario">
-                                                    Cambiar contraseña
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <hr class="dropdown-divider" />
-                                            </li>
-                                            <li>
-                                                <form asp-controller="Account" asp-action="Logout" method="post"
-                                                    class="dropdown-item p-0 m-0">
-                                                    <button type="submit" class="dropdown-item text-start">Cerrar Sesión</button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                }
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="perfilDropdown" role="button">
+                                        @if (!string.IsNullOrEmpty(avatar))
+                                        {
+                                            <img src="@avatar" alt="Avatar" class="rounded-circle p-2"
+                                                style="width: 40px; height: 40px;" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-person-circle text-primary p-2" style="font-size: 1.5rem;"></i>
+                                        }
+                                        Perfil
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="perfilDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Usuario" asp-action="Upsert"
+                                                asp-route-id="@idUsuario">
+                                                Editar perfil
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Usuario" asp-action="CambiarContrasena"
+                                                asp-route-id="@idUsuario">
+                                                Cambiar contraseña
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post"
+                                                class="dropdown-item p-0 m-0">
+                                                <button type="submit" class="dropdown-item text-start">Cerrar Sesión</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
                             }
 
                             @if (User.IsInRole("Administrador"))
@@ -108,7 +113,7 @@
                     <ul class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            // Ocultar el botón de "Cerrar Sesión" si el usuario tiene el rol de "Empleado"
+
                             if (!User.IsInRole("Empleado"))
                             {
                                 <li class="nav-item">

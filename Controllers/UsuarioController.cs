@@ -29,6 +29,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
         {
             try
             {
+
                 var lista = ru.GetAllForIndex(10, pageNumber, nombre);
 
                 var totalEntries = ru.getTotalEntries(nombre);
@@ -115,7 +116,37 @@ namespace PenalozaFernandezInmobiliario.Controllers
         {
             try
             {
-                //if (ModelState.IsValid)
+                if (usuarioViewModel.Usuario.IdUsuario > 0) // Si es una edición
+                {
+                    var usuarioActual = ru.GetById(usuarioViewModel.Usuario.IdUsuario);
+
+                    if (usuarioActual == null)
+                    {
+                        ModelState.AddModelError("", "El usuario no existe.");
+                        return View("Upsert", usuarioViewModel);
+                    }
+
+                    // Si el campo de contraseña está vacío, mantenemos la contraseña actual
+                    if (string.IsNullOrEmpty(usuarioViewModel.Usuario.Clave))
+                    {
+                        usuarioViewModel.Usuario.Clave = usuarioActual.Clave;
+                    }
+                    else
+                    {
+                        // Hashear la nueva contraseña
+                        string salt = configuration["Salt"];
+
+                        string hashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                            password: usuarioViewModel.Usuario.Clave,
+                            salt: System.Text.Encoding.ASCII.GetBytes(salt),
+                            prf: KeyDerivationPrf.HMACSHA1,
+                            iterationCount: 1000,
+                            numBytesRequested: 256 / 8));
+
+                        usuarioViewModel.Usuario.Clave = hashedPassword;
+                    }
+                }
+                else // Si es un nuevo usuario
                 {
                     if (!string.IsNullOrEmpty(usuarioViewModel.Usuario.Clave))
                     {
@@ -130,37 +161,36 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
                         usuarioViewModel.Usuario.Clave = hashedPassword;
                     }
-
-                    // Si hay un nuevo archivo de avatar, lo subimos y actualizamos la ruta
-                    if (usuarioViewModel.AvatarFile != null && usuarioViewModel.AvatarFile.Length > 0)
-                    {
-                        var fileName = Path.GetFileNameWithoutExtension(usuarioViewModel.AvatarFile.FileName);
-                        var extension = Path.GetExtension(usuarioViewModel.AvatarFile.FileName);
-                        var newFileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmss}{extension}";
-                        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/avatars", newFileName);
-
-                        using (var stream = new FileStream(path, FileMode.Create))
-                        {
-                            usuarioViewModel.AvatarFile.CopyTo(stream);
-                        }
-
-                        usuarioViewModel.Usuario.Avatar = "/avatars/" + newFileName;
-                    }
-
-
-                    if (usuarioViewModel.Usuario.IdUsuario > 0)
-                    {
-                        ru.Update(usuarioViewModel.Usuario);
-                        TempData["ToastMessage"] = "Usuario editado con éxito!";
-                    }
-                    else
-                    {
-                        ru.Create(usuarioViewModel.Usuario);
-                        TempData["ToastMessage"] = "Usuario creado con éxito!";
-                    }
-
-                    return RedirectToAction("Upsert", new { id = usuarioViewModel.Usuario.IdUsuario });
                 }
+
+                // Manejo del archivo de avatar
+                if (usuarioViewModel.AvatarFile != null && usuarioViewModel.AvatarFile.Length > 0)
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(usuarioViewModel.AvatarFile.FileName);
+                    var extension = Path.GetExtension(usuarioViewModel.AvatarFile.FileName);
+                    var newFileName = $"{fileName}_{DateTime.Now:yyyyMMddHHmmss}{extension}";
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/avatars", newFileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        usuarioViewModel.AvatarFile.CopyTo(stream);
+                    }
+
+                    usuarioViewModel.Usuario.Avatar = "/avatars/" + newFileName;
+                }
+
+                if (usuarioViewModel.Usuario.IdUsuario > 0)
+                {
+                    ru.Update(usuarioViewModel.Usuario);
+                    TempData["ToastMessage"] = "Usuario editado con éxito!";
+                }
+                else
+                {
+                    ru.Create(usuarioViewModel.Usuario);
+                    TempData["ToastMessage"] = "Usuario creado con éxito!";
+                }
+
+                return RedirectToAction("Upsert", new { id = usuarioViewModel.Usuario.IdUsuario });
             }
             catch (Exception ex)
             {
@@ -170,6 +200,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
             return View("Upsert", usuarioViewModel);
         }
+
 
         [HttpPost]
         public IActionResult Create(Usuario usuario)
@@ -289,7 +320,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
             return View(viewModel);
         }
 
-        // POST: Usuario/CambiarContrasena
+
         [HttpPost]
         [Authorize]
         public IActionResult CambiarContrasena(CambiarContraseñaViewModel model)
@@ -298,20 +329,20 @@ namespace PenalozaFernandezInmobiliario.Controllers
             {
                 try
                 {
-                    // Obtener el ID del usuario autenticado
+
                     var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     if (claimValue == null || model.IdUsuario != int.Parse(claimValue))
                     {
                         return Forbid();
                     }
 
-                    // Obtener el usuario desde el repositorio
+
                     var usuario = ru.GetById(model.IdUsuario);
 
                     if (usuario == null)
                     {
                         ModelState.AddModelError("", "Usuario no encontrado.");
-                        return View(model);
+                        return View();
                     }
 
                     // Verificar la contraseña actual
@@ -348,8 +379,9 @@ namespace PenalozaFernandezInmobiliario.Controllers
                     usuario.Clave = hashedNewPassword;
                     ru.Update(usuario);
 
-                    TempData["ToastMessage"] = "¡Contraseña cambiada con éxito!";
-                    return RedirectToAction("Upsert", new { id = model.IdUsuario });
+                    TempData["ToastMessage"] = "Contraseña cambiada con exito";
+
+                    return View(model);
                 }
                 catch (Exception ex)
                 {
@@ -361,6 +393,16 @@ namespace PenalozaFernandezInmobiliario.Controllers
             return View(model);
         }
 
+        private string GetToastMessage()
+        {
+            if (TempData.ContainsKey("ToastMessage"))
+            {
+                var toastMessage = TempData["ToastMessage"] as string;
+                TempData.Remove("ToastMessage");
+                return toastMessage == null ? "" : toastMessage;
+            }
+            return "";
+        }
 
     }
 }

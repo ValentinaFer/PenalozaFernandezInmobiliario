@@ -58,11 +58,12 @@ namespace PenalozaFernandezInmobiliario.Controllers
                         {
                             new Claim(ClaimTypes.Name, usuario.Email),
                             new Claim(ClaimTypes.Role, usuario.RolNombre),
-                            new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString())
+                            new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+                            new Claim("Avatar", usuario.Avatar ?? "")
                         };
-                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+                        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var principal = new ClaimsPrincipal(identity);
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
 
                         TempData["ToastMessage"] = "Inicio de sesion exitoso";

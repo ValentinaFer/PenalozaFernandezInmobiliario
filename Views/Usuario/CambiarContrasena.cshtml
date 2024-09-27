@@ -43,9 +43,32 @@
             </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-}
+
+
+
+    @section Scripts {
+
+
+        @{
+            if (Model != null && Model.ToastMessage != null)
+            {
+                <text>
+                    <script>
+                        const Rol = "@Model.Rol";
+                        $(document).ready(function () {
+                            var toastMessage = "@Model.ToastMessage";
+                            if (toastMessage) {
+                                $("#toastMessage").text(toastMessage);
+                                $("#liveToast").toast("show");
+                            }
+
+                        })
+                    </script>
+                </text>
+            }
+        }
+        <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    }
+</div>
