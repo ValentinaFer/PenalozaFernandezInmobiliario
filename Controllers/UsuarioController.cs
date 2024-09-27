@@ -7,6 +7,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 using PenalozaFernandezInmobiliario.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace PenalozaFernandezInmobiliario.Controllers
 {
@@ -112,7 +114,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
         }
 
         [HttpPost]
-        public IActionResult Guardar(UpsertUsuarioViewModel usuarioViewModel)
+        public async Task<IActionResult> Guardar(UpsertUsuarioViewModel usuarioViewModel)
         {
             try
             {
@@ -182,6 +184,13 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 if (usuarioViewModel.Usuario.IdUsuario > 0)
                 {
                     ru.Update(usuarioViewModel.Usuario);
+                    var ClaimsIdentity = User.Identity as ClaimsIdentity;
+                    var claimAvatar = ClaimsIdentity.FindFirst("Avatar");
+
+                        ClaimsIdentity.AddClaim(new Claim("Avatar", usuarioViewModel.Usuario.Avatar));
+                    
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(ClaimsIdentity));
+
                     TempData["ToastMessage"] = "Usuario editado con éxito!";
                 }
                 else
@@ -227,7 +236,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
         }
 
         [HttpPost]
-        public IActionResult Update(Usuario usuario)
+        public async Task<IActionResult> Update(Usuario usuario)
         {
             try
             {
@@ -235,6 +244,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
                 if (result > 0)
                 {
                     TempData["ToastMessage"] = "Usuario editado con éxito!";
+                    
                 }
                 else
                 {
@@ -282,7 +292,7 @@ namespace PenalozaFernandezInmobiliario.Controllers
 
 
 
-        public IActionResult QuitarAvatar()
+        public async Task<IActionResult> QuitarAvatar()
         {
             var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -300,6 +310,14 @@ namespace PenalozaFernandezInmobiliario.Controllers
             {
                 usuario.Avatar = string.Empty;
                 ru.Update(usuario);
+                var ClaimsIdentity = User.Identity as ClaimsIdentity;
+                var claimAvatar = ClaimsIdentity.FindFirst("Avatar");
+
+                if (claimAvatar != null){
+                    ClaimsIdentity.RemoveClaim(claimAvatar);
+                }
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(ClaimsIdentity));
+            
             }
 
             return RedirectToAction("Upsert", new { id = userId });
