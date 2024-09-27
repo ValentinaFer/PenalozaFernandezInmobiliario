@@ -15,7 +15,8 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        return View();
+        var ToastMessage = GetToastMessage();
+        return View(new { ToastMessage }); 
     }
 
     public IActionResult Privacy()
@@ -27,5 +28,16 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    private string GetToastMessage()
+    {
+        if (TempData.ContainsKey("ToastMessage"))
+        {
+            var toastMessage = TempData["ToastMessage"] as string;
+            TempData.Remove("ToastMessage");
+            return toastMessage == null ? "" : toastMessage;
+        }
+        return "";
     }
 }

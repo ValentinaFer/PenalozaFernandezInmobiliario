@@ -1,13 +1,35 @@
-﻿@{
+﻿@model
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">¡Bienvenido!</h1>
     <p>Aquí pondremos más cositas... luego.</p>
+    <partial name="_ToastModal" />
 
-
-
+ 
 
 
 </div>
+ @section Scripts {
+        @{
+            if (Model != null && Model.ToastMessage != null)
+            {
+                <text>
+                    <script>
+                        $(document).ready(function () {
+
+                            var toastMessage = "@Model.ToastMessage";
+                            if (toastMessage) {
+                                $("#toastMessage").text(toastMessage);
+                                $("#liveToast").toast("show");
+                            }
+
+                        })
+                    </script>
+                </text>
+            }
+        }
+
+    }
