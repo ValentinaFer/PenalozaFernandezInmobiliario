@@ -11,6 +11,7 @@ using PenalozaFernandezInmobiliario.Models;
 
 namespace PenalozaFernandezInmobiliario.Controllers;
 
+[Authorize(Roles = "Administrador, Empleado")]
 public class ContratoController : Controller
 {
     private readonly ILogger<ContratoController> _logger;
@@ -31,8 +32,6 @@ public class ContratoController : Controller
         rpPago = new RepositorioPago();
     }
 
-
-    [Authorize(Roles = "Administrador, Empleado")]
     public IActionResult Index(IList<Contrato> lista, int pageNumber = 1)
     {
         try

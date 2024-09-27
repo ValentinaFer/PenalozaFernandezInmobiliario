@@ -18,6 +18,28 @@ $(document).ready(function () {
         }).format(val);
     }
 
+    function calcularMulta(fechaDesde, fechaHasta, fechaFinalizacion, precio) {
+        let multa = 0;
+        if (fechaDesde && fechaHasta) {
+            fechaDesde = new Date(fechaDesde);
+            fechaHasta = new Date(fechaHasta);
+            const mesesTotales = ((fechaHasta.getFullYear() - fechaDesde.getFullYear()) * 12) + (fechaHasta.getMonth() - fechaDesde.getMonth() + 1);
+            const mesesHastaFinDecimal = getMesesEnDecimal(fechaDesde, fechaFinalizacion);
+            console.log(mesesHastaFinDecimal, mesesTotales/2);
+            if (mesesHastaFinDecimal > mesesTotales / 2) {
+                multa = precio * 2;
+            } else {
+                multa = precio * 1;
+            }
+        }
+        return multa;
+    }
+
+    function calcularData(contrato){
+        const multa = calcularMulta(contrato.fechaDesde, contrato.fechaHasta, contrato.fechaFinalizacion,contrato.monto);
+        
+    }
+
     $(".btn_activar").on("click", function () {
         const idContrato = $(this).data("id");
         console.log(idContrato);

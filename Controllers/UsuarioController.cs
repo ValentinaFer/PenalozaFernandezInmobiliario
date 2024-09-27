@@ -378,9 +378,8 @@ namespace PenalozaFernandezInmobiliario.Controllers
                     // Actualizar la contraseña en la base de datos
                     usuario.Clave = hashedNewPassword;
                     ru.Update(usuario);
-
-                    TempData["ToastMessage"] = "Contraseña cambiada con exito";
-
+                    
+                    model.ToastMessage ="Contraseña cambiada con exito";
                     return View(model);
                 }
                 catch (Exception ex)

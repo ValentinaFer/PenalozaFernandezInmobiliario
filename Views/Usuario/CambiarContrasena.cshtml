@@ -8,7 +8,9 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
+                <partial name="_ToastModal" />
                 <div class="card-header bg-primary text-white">
+                    
                     <h3>Cambiar Contraseña</h3>
                 </div>
                 <div class="card-body">
@@ -49,15 +51,15 @@
 
     @section Scripts {
 
-
         @{
             if (Model != null && Model.ToastMessage != null)
             {
                 <text>
+                    @using System.Text.Json
                     <script>
                         const Rol = "@Model.Rol";
                         $(document).ready(function () {
-                            var toastMessage = "@Model.ToastMessage";
+                            var toastMessage = @Html.Raw(JsonSerializer.Serialize(Model.ToastMessage));
                             if (toastMessage) {
                                 $("#toastMessage").text(toastMessage);
                                 $("#liveToast").toast("show");

@@ -9,8 +9,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using PenalozaFernandezInmobiliario.Models;
 
+
 namespace PenalozaFernandezInmobiliario.Controllers;
 
+[Authorize(Roles = "Administrador, Empleado")]
 public class PagoController : Controller
 {
     private readonly ILogger<PagoController> _logger;
@@ -40,11 +42,12 @@ public class PagoController : Controller
                 throw new ArgumentException("No se recibio el ID del contrato.");
             }
             var contrato = rpP.ObtenerPagosPorContrato(idContrato);
-            if (contrato == null){
+            if (contrato == null)
+            {
                 throw new KeyNotFoundException("¡Contrato no encontrado!");
             }
             var datos = rpP.ObtenerCalculos(contrato);
-            return Json(new { calculos = datos, contrato = contrato});
+            return Json(new { calculos = datos, contrato = contrato });
         }
         catch (KeyNotFoundException ex)
         {
@@ -85,7 +88,8 @@ public class PagoController : Controller
             }
 
             var nroPago = rpP.Crear(detalle, contrato);
-            if (nroPago <= 0){
+            if (nroPago <= 0)
+            {
                 throw new Exception("El pago no pudo ser agregado");
             }
             return Json(nroPago);
@@ -153,14 +157,17 @@ public class PagoController : Controller
 
     [Authorize(Roles = "Administrador")]
     [HttpPost("/Contrato/Pagos/Eliminar")]
-    public IActionResult DeletePago(int idPago, int idContrato){
+    public IActionResult DeletePago(int idPago, int idContrato)
+    {
         try
         {
-            if (idContrato <= 0 || idPago <= 0){
+            if (idContrato <= 0 || idPago <= 0)
+            {
                 throw new ArgumentException("No se recibio el ID del contrato o el ID del pago");
             }
             var contrato = rp.GetById(idContrato);
-            if (contrato == null){
+            if (contrato == null)
+            {
                 throw new KeyNotFoundException("No se encontro el contrato");
             }
             Console.WriteLine(idContrato + " " + idPago);
@@ -168,7 +175,7 @@ public class PagoController : Controller
             if (res < 0)
             {
                 throw new Exception("Ocurrio un error al eliminar el pago");
-            } 
+            }
 
             return Json(res);
         }
@@ -182,7 +189,8 @@ public class PagoController : Controller
             _logger.LogError(ex, ex.Message);
             return StatusCode(404, new { message = ex.Message, exceptionType = "KeyNotFoundException" });
         }
-        catch (Exception ex){
+        catch (Exception ex)
+        {
             _logger.LogError(ex, ex.Message);
             return StatusCode(500, new { message = "Ocurrio un error inesperado.", error = ex.Message, exceptionType = "Exception" });
         }
