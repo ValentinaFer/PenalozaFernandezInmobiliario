@@ -12,6 +12,7 @@ using PenalozaFernandezInmobiliario.Models;
 namespace PenalozaFernandezInmobiliario.Api;
 
 [Route("api/[controller]")]
+[ApiController]
 public class PropietariosController : ControllerBase
 {
     private readonly MyDbContext _context;
