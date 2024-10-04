@@ -19,8 +19,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     
     builder.Services.AddDbContext<MyDbContext>( //para EF usando mySql y Pomelo
         options => options.UseMySql(
-            builder.Configuration["ConnectionString:DefaultConnection"],
-            new MySqlServerVersion(new Version(8, 0, 32))
+            builder.Configuration["ConnectionString"],
+            new MariaDbServerVersion(new Version(10, 4, 32))
         )
     );
 
